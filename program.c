@@ -1,3 +1,6 @@
+#define BRICK_TEXTURE_W 16
+#define BRICK_TEXTURE_H 16
+
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -70,6 +73,17 @@ static int font_init(void)
   if (!font)
   {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load font! TTF_Error: %s\n", SDL_GetError());
+    return 3;
+  }
+  return 0;
+}
+
+static int brick_texture_init(void)
+{
+  SDL_Texture *brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, BRICK_TEXTURE_W, BRICK_TEXTURE_H);
+  if (brick_texture == NULL)
+  {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
     return 3;
   }
   return 0;

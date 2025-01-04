@@ -4,6 +4,7 @@
     "sdl.h": "c",
     "math.h": "c",
     "complex": "c",
-    "sdl_ttf.h": "c"
+    "sdl_ttf.h": "c",
+    "vector": "c"
   }
 }
