@@ -1,0 +1,4 @@
+# Ignore executables with no extension
+*
+!*.*
+!*/
