@@ -73,6 +73,8 @@ static const struct
 SDL_Window *win;
 SDL_Renderer *renderer;
 //
+SDL_Texture *brick_texture;
+//
 SDL_FRect player_rect;
 SDL_Texture *player_texture;
 //
@@ -134,7 +136,7 @@ static int font_init(void)
 
 static int brick_texture_init(void)
 {
-  SDL_Texture *brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, BRICK_TEXTURE_W, BRICK_TEXTURE_H);
+  brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, BRICK_TEXTURE_W, BRICK_TEXTURE_H);
   if (brick_texture == NULL)
   {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
@@ -368,7 +370,28 @@ static void draw_dda_ray(void)
         .h = (int)line_h,
     };
 
-    SDL_RenderFillRect(renderer, &wall_rect);
+    float wall_x;
+    if (side == 0)
+    {
+      wall_x = dda.wall.y; // For vertical walls, use the calculated y position
+    }
+    else
+    {
+      wall_x = dda.wall.x; // For horizontal walls, use the calculated x position
+    }
+
+    wall_x = wall_x / CELL_SIZE;
+    wall_x -= floor(wall_x);
+
+    int tex_x = (int)(wall_x * BRICK_TEXTURE_W);
+
+    SDL_FRect src_rect = {
+        .x = tex_x,
+        .y = 0,
+        .w = 1,
+        .h = BRICK_TEXTURE_H};
+
+    SDL_RenderTextureTiled(renderer, brick_texture, &src_rect, line_h / BRICK_TEXTURE_H, &wall_rect);
   }
 }
 
