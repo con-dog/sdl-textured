@@ -73,6 +73,7 @@ static void move_player(float direction, float delta_time)
 
   // TODO - Allow it so player can still "slide" along walls
   // Only move it none of the corners would hit a wall
+  printf("hitbox_top_left %d", hitbox_top_left);
   if (hitbox_top_left == z && hitbox_top_right == z &&
       hitbox_bottom_left == z && hitbox_bottom_right == z)
   {
