@@ -319,7 +319,7 @@ void update_display(void)
 
   // Draw
   draw_top_down_wall_map();
-  // draw_player();
+  draw_player();
   // draw_dda_ray();
   SDL_RenderPresent(renderer);
 }
@@ -344,7 +344,7 @@ void run_game_loop(void)
       }
     }
 
-    // handle_player_movement(delta_time);
+    handle_player_movement(delta_time);
     update_display();
   }
 }

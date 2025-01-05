@@ -7,7 +7,7 @@ static Player player = {
     .rect.x = PLAYER_START_POS_X,
     .rect.y = PLAYER_START_POS_Y,
     // Movement
-    .delta.x = 1,
+    .delta.x = 5,
     .delta.y = 0,
     // Angle
     .angle = 0,
