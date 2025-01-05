@@ -19,9 +19,6 @@
 #include "./textures/bricks/var-2/brick-var-2.h"
 #include "./textures/bricks/var-3/brick-var-3.h"
 
-// SDL_Window *win;
-// SDL_Renderer *renderer;
-//
 SDL_Texture *brick_var_1_texture;
 SDL_Texture *brick_var_2_texture;
 SDL_Texture *brick_var_3_texture;

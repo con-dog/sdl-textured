@@ -5,6 +5,7 @@
 #include <SDL3/SDL_rect.h>
 
 #include "map.h"
+#include "../sdl/sdl-handler.h"
 
 typedef struct RGBA_Colour
 {

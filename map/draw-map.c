@@ -49,6 +49,8 @@ extern void draw_map(void)
     initialized = true;
   }
 
+  SDL_Renderer *renderer = get_renderer();
+
   draw_filled_rects(renderer, white_rects, white_rect_count, &white);
   draw_filled_rects(renderer, black_rects, black_rect_count, &black);
 }
