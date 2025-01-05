@@ -44,20 +44,17 @@ extern void cast_rays(void)
         .y = sin(angle_rads),
     };
 
-    Vector_1D step_x = {.v = ray_direction_vector.x >= 0 ? 1 : -1};
-    Vector_1D step_y = {.v = ray_direction_vector.y >= 0 ? 1 : -1};
+    Vector_1D step_x = {.v = (ray_direction_vector.x >= 0) ? 1 : -1};
+    Vector_1D step_y = {.v = (ray_direction_vector.y >= 0) ? 1 : -1};
     // Distance along ray from one x or y side to next
     Vector_1D delta_x = {.v = fabs(1.0 / ray_direction_vector.x)};
     Vector_1D delta_y = {.v = fabs(1.0 / ray_direction_vector.y)};
     Point_1D map_x = {.p = floorf(ray_start_point.x / CELL_SIZE)};
     Point_1D map_y = {.p = floorf(ray_start_point.y / CELL_SIZE)};
-    //
-    Vector_1D dist_to_side_x = {.v = ray_direction_vector.x < 0
-                                         ? ((ray_start_point.x / CELL_SIZE) - map_x.p) * delta_x.v
-                                         : (map_x.p + 1.0f - (ray_start_point.x / CELL_SIZE)) * delta_x.v};
-    Vector_1D dist_to_side_y = {.v = ray_direction_vector.y < 0
-                                         ? ((ray_start_point.y / CELL_SIZE) - map_y.p) * delta_y.v
-                                         : (map_y.p + 1.0f - (ray_start_point.y / CELL_SIZE)) * delta_y.v};
+    Vector_1D dist_to_side_x = {.v = (ray_direction_vector.x < 0) ? ((ray_start_point.x / CELL_SIZE) - map_x.p) * delta_x.v
+                                                                  : (map_x.p + 1.0f - (ray_start_point.x / CELL_SIZE)) * delta_x.v};
+    Vector_1D dist_to_side_y = {.v = (ray_direction_vector.y < 0) ? ((ray_start_point.y / CELL_SIZE) - map_y.p) * delta_y.v
+                                                                  : (map_y.p + 1.0f - (ray_start_point.y / CELL_SIZE)) * delta_y.v};
     Point_1D wall_x = {.p = ray_start_point.x};
     Point_1D wall_y = {.p = ray_start_point.y};
 
@@ -89,16 +86,14 @@ extern void cast_rays(void)
       ray_end_point.x = wall_x.p;
       ray_end_point.y = wall_y.p;
 
-      draw_ray(&ray_start_point, &ray_end_point);
-
-      // Check if we've hit a wall
-      if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] != z)
+      if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] == A)
       {
         hit = true;
-
         break;
       }
     }
+    draw_ray(&ray_start_point, &ray_end_point); // Move this here
+
     print_text(
         angle_rads,
         &ray_start_point,

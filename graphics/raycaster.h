@@ -3,6 +3,9 @@
 
 #define RAYS_ANGLE_INC 0.5f
 
+#include <stdbool.h>
+
+#include "../map/map.h"
 #include "../player/player-char.h"
 #include "../sdl/sdl-handler.h"
 
