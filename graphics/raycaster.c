@@ -62,7 +62,6 @@ extern void cast_rays(void)
     Point_1D wall_y = {.p = ray_start_point.y};
 
     bool hit = false;
-    Wall_Side_Hit side;
     while (!hit)
     {
       if (dist_to_side_x.v < dist_to_side_y.v)
@@ -74,7 +73,7 @@ extern void cast_rays(void)
         wall_y.p = ray_start_point.y + (wall_x.p - ray_start_point.x) * ray_direction_vector.y / ray_direction_vector.x;
         dist_to_side_x.v += delta_x.v;
         map_x.p += step_x.v;
-        side = Wall_X_Hit;
+        printf("AAAA\n");
       }
       else
       {
@@ -84,36 +83,37 @@ extern void cast_rays(void)
         wall_x.p = ray_start_point.x + (wall_y.p - ray_start_point.y) * ray_direction_vector.x / ray_direction_vector.y;
         dist_to_side_y.v += delta_y.v;
         map_y.p += step_y.v;
-        side = Wall_Y_Hit;
+        printf("BBBB\n");
       }
 
-      print_text(
-          angle_rads,
-          &ray_start_point,
-          &ray_end_point,
-          &ray_direction_vector,
-          &step_x,
-          &step_y,
-          &delta_x,
-          &delta_y,
-          &map_x,
-          &map_y,
-          &dist_to_side_x,
-          &dist_to_side_y,
-          &wall_x,
-          &wall_y);
+      ray_end_point.x = wall_x.p;
+      ray_end_point.y = wall_y.p;
+
+      draw_ray(&ray_start_point, &ray_end_point);
 
       // Check if we've hit a wall
       if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] != z)
       {
         hit = true;
-        ray_end_point.x = wall_x.p;
-        ray_end_point.y = wall_y.p;
+
         break;
       }
     }
-
-    draw_ray(&ray_start_point, &ray_end_point);
+    print_text(
+        angle_rads,
+        &ray_start_point,
+        &ray_end_point,
+        &ray_direction_vector,
+        &step_x,
+        &step_y,
+        &delta_x,
+        &delta_y,
+        &map_x,
+        &map_y,
+        &dist_to_side_x,
+        &dist_to_side_y,
+        &wall_x,
+        &wall_y);
   }
 }
 
