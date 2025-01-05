@@ -17,41 +17,9 @@
 #include "./textures/textures.h"
 #include "./textures/textures-init.h"
 
-SDL_FRect player_rect;
 SDL_Texture *player_texture;
-//
-// Player_Pos player_pos = {
-//     .w = PLAYER_SIZE,
-//     .h = PLAYER_SIZE,
-// };
-//
+
 const bool *keyboard_state;
-
-static void player_init(void)
-{
-  player_pos.x = 72.0f;
-  player_pos.y = 72.0f;
-  player_pos.angle = 0.0f;
-  player_pos.dx = cos(player_pos.angle) * 5;
-  player_pos.dy = sin(player_pos.angle) * 5;
-  player_rect.h = player_pos.h;
-  player_rect.w = player_pos.w;
-  player_rect.x = player_pos.x;
-  player_rect.y = player_pos.y;
-
-  player_texture = SDL_CreateTexture(renderer,
-                                     SDL_PIXELFORMAT_RGBA8888,
-                                     SDL_TEXTUREACCESS_TARGET,
-                                     PLAYER_SIZE * 4, // 4x resolution
-                                     PLAYER_SIZE * 4);
-
-  SDL_SetTextureBlendMode(player_texture, SDL_BLENDMODE_BLEND);
-  SDL_SetTextureScaleMode(player_texture, SDL_SCALEMODE_LINEAR);
-  SDL_SetRenderTarget(renderer, player_texture);
-  SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
-  SDL_RenderClear(renderer);
-  SDL_SetRenderTarget(renderer, NULL);
-}
 
 // // Draw a simple direction indicator ray from player's center
 // static void draw_player_direction_ray(void)

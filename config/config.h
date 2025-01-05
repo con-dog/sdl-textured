@@ -6,4 +6,7 @@
 #define FONT_SMALL 12
 #define CAMERA_ROTATION_STEP 5.0f
 
+#define PLAYER_START_POS_X 72.0f
+#define PLAYER_START_POS_Y 72.0f
+
 #endif
