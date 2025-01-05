@@ -1,7 +1,4 @@
 #include "./bricks-init.h"
-#include "./var-1/brick-var-1.h"
-#include "./var-2/brick-var-2.h"
-#include "./var-3/brick-var-3.h"
 
 static SDL_Texture *brick_var_1_texture = NULL;
 static SDL_Texture *brick_var_2_texture = NULL;

@@ -5,6 +5,10 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_hints.h>
 
+#include "./var-1/brick-var-1.h"
+#include "./var-2/brick-var-2.h"
+#include "./var-3/brick-var-3.h"
+
 extern SDL_Texture *get_brick_texture_1(void);
 extern SDL_Texture *get_brick_texture_2(void);
 extern SDL_Texture *get_brick_texture_3(void);
