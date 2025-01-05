@@ -2129,8 +2129,8 @@ static void player_init(void)
   player.angle = 0.0f;
 
   double angle_radians = convert_deg_to_rads(player.angle);
-  player.delta.x = cos(angle_radians);
-  player.delta.y = sin(angle_radians);
+  player.delta.x = cos(angle_radians) * MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(angle_radians) * MOTION_DELTA_MULTIPLIER;
 }
 
 static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg, float length)
@@ -2408,13 +2408,16 @@ static void draw_map(void)
   SDL_RenderFillRects(renderer, black_rects, black_count);
 }
 
-void rotate_player(float rotation_type, float delta_time)
+void rotate_player(Rotation_Type rotation, float delta_time)
 {
-  player.angle = player.angle + (rotation_type * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
-  player.angle = player.angle < 0.0f ? 360.0f : player.angle;
-  double angle_radians = player.angle * (M_PI / 180);
-  player.delta.x = cos(angle_radians) * 5;
-  player.delta.y = sin(angle_radians) * 5;
+  player.angle = player.angle + (rotation * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
+  player.angle = (player.angle < 0) ? 360
+                 : (player.angle > 360)
+                     ? 0
+                     : player.angle;
+  double angle_rads = convert_deg_to_rads(player.angle);
+  player.delta.x = cos(angle_rads) * MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(angle_rads) * MOTION_DELTA_MULTIPLIER;
 }
 
 void move_player(float direction, float delta_time)
