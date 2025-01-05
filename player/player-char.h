@@ -13,6 +13,7 @@
 #include <SDL3/SDL_render.h>
 
 #include "../config/config.h"
+#include "../graphics/raycaster.h"
 #include "../map/map.h"
 #include "../peripherals/peripheral-handler.h"
 #include "../sdl/sdl-handler.h"

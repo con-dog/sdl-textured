@@ -5,8 +5,13 @@
 
 #include "../player/player-char.h"
 
-static void cast_rays(void);
-static void draw_rays(void);
+typedef enum Wall_Side
+{
+  Wall_X,
+  Wall_Y
+} Wall_Side;
+
+extern void cast_rays(void);
 
 // // Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
 // static void draw_dda_ray(void)

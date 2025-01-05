@@ -23,6 +23,7 @@
     "player.h": "c",
     "peripheral-handler.h": "c",
     "sdl_rect.h": "c",
-    "raycaster.h": "c"
+    "raycaster.h": "c",
+    "player-char.h": "c"
   },
 }

@@ -1,9 +1,12 @@
 #include "raycaster.h"
+#include <stdio.h>
 
 /*
  * Cast ray/s from player to wall using Digital Differential Analysis Algorithm
  */
-static void cast_rays(void)
+static void draw_ray(Point_2D *start, Point_2D *stop);
+
+extern void cast_rays(void)
 {
   Player *player = get_player();
 
@@ -18,7 +21,7 @@ static void cast_rays(void)
         .x = player->rect.x + (PLAYER_W / 2), // Center of Player
         .y = player->rect.y + (PLAYER_H / 2), // Center of Player
     };
-
+    Point_2D ray_end_point;
     Vector_2D ray_direction_vector = {
         .x = cos(angle_rads),
         .y = sin(angle_rads),
@@ -41,19 +44,53 @@ static void cast_rays(void)
     Point_1D wall_x = {.p = ray_start_point.x};
     Point_1D wall_y = {.p = ray_start_point.y};
 
-    // Calculate initial side distances - distance from start to first x or y grid line
-    //         .side_dist.x = (ray.x_dir < 0)
-    //                            ? ((ray.x0 / CELL_SIZE) - dda.map_pos.x) * dda.delta.x
-    //                            : (dda.map_pos.x + 1.0f - (ray.x0 / CELL_SIZE)) * dda.delta.x,
-    //         .side_dist.y = (ray.y_dir < 0)
-    //                            ? ((ray.y0 / CELL_SIZE) - dda.map_pos.y) * dda.delta.y
-    //                            : (dda.map_pos.y + 1.0f - (ray.y0 / CELL_SIZE)) * dda.delta.y,
-    //         .wall.x = ray.x0,
-    //         .wall.y = ray.y0,
+    bool hit = false;
+    Wall_Side side;
+    while (!hit)
+    {
+      if (dist_to_side_x.v < dist_to_side_y.v)
+      {
+        // Calculate exact wall hit position for x-side
+        wall_x.p = ray_direction_vector.x < 0
+                       ? map_x.p * CELL_SIZE
+                       : (map_x.p + 1) * CELL_SIZE;
+        wall_y.p = ray_start_point.y + (wall_x.p - ray_start_point.x) * ray_direction_vector.y / ray_direction_vector.x;
+        dist_to_side_x.v += delta_x.v;
+        map_x.p += step_x.v;
+        side = Wall_X;
+      }
+      else
+      {
+        wall_y.p = ray_direction_vector.y < 0
+                       ? map_y.p * CELL_SIZE
+                       : (map_y.p + 1) * CELL_SIZE;
+        wall_x.p = ray_start_point.x + (wall_y.p - ray_start_point.y) * ray_direction_vector.x / ray_direction_vector.y;
+        dist_to_side_y.v += delta_y.v;
+        map_y.p += step_y.v;
+        side = Wall_Y;
+      }
+      printf("ray_end_point: %.2f", ray_end_point.x);
+      ray_end_point.x = wall_x.p;
+      ray_end_point.y = wall_y.p;
+
+      if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] != z)
+      {
+        printf("HIT~~!");
+        hit = true;
+      }
+    }
+
+    draw_ray(&ray_start_point, &ray_end_point);
   }
 }
 
-extern void draw_rays(void);
+static void draw_ray(Point_2D *start, Point_2D *stop)
+{
+  SDL_Renderer *renderer = get_renderer();
+  RGBA_Colour ray = {0, 255, 0, 255};
+  SDL_SetRenderDrawColor(renderer, ray.r, ray.g, ray.b, ray.a);
+  SDL_RenderLine(renderer, start->x, start->y, stop->x, stop->y);
+}
 
 // // Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
 // static void draw_dda_ray(void)
