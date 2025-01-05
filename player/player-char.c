@@ -66,10 +66,6 @@ static void move_player(float direction, float delta_time)
   float new_x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time);
   float new_y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time);
 
-  // Equiv wall map grid coord
-  int wall_map_x = (int)(new_x / CELL_SIZE);
-  int wall_map_y = (int)(new_y / CELL_SIZE);
-
   // Calculate offsets from players hit-box
   int hitbox_top_left = top_down_wall_map[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
   int hitbox_top_right = top_down_wall_map[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
