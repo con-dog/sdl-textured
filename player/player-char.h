@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef PLAYER_CHAR_H
+#define PLAYER_CHAR_H
 
 #define PLAYER_W 8.0f
 #define PLAYER_H 8.0f
@@ -14,6 +14,7 @@
 #include "../config/config.h"
 #include "../map/map.h"
 #include "../peripherals/peripheral-handler.h"
+#include "../sdl/sdl-handler.h"
 #include "../utils/utils.h"
 
 typedef struct Player

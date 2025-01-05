@@ -7,7 +7,7 @@ extern void draw_filled_rects(SDL_Renderer *renderer, SDL_FRect *rects, unsigned
   SDL_RenderFillRects(renderer, rects, rects_count);
 }
 
-extern void draw_map(void)
+extern void draw_top_down_wall_map(void)
 {
   static bool initialized = false;
   static int black_rect_count = 0;
@@ -22,8 +22,10 @@ extern void draw_map(void)
   const Letter *top_down_wall_map = get_top_down_wall_map(&wall_map_rows, &wall_map_cols);
   unsigned int wall_map_total_size = wall_map_rows * wall_map_cols;
 
-  SDL_FRect black_rects[wall_map_total_size];
-  SDL_FRect white_rects[wall_map_total_size];
+  static SDL_FRect black_rects[GRID_SIZE];
+  static SDL_FRect white_rects[GRID_SIZE];
+
+  SDL_Renderer *renderer = get_renderer();
 
   if (!initialized)
   {
@@ -48,8 +50,6 @@ extern void draw_map(void)
     }
     initialized = true;
   }
-
-  SDL_Renderer *renderer = get_renderer();
 
   draw_filled_rects(renderer, white_rects, white_rect_count, &white);
   draw_filled_rects(renderer, black_rects, black_rect_count, &black);

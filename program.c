@@ -1,25 +1,4 @@
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_keyboard.h>
-#include <SDL3/SDL_main.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_rect.h>
-
 #include "program.h"
-#include "./sdl/sdl-handler.h"
-#include "./map/map.h"
-#include "./textures/textures.h"
-#include "./textures/textures-init.h"
-
-SDL_Texture *player_texture;
-
-const bool *keyboard_state;
 
 // // Draw a simple direction indicator ray from player's center
 // static void draw_player_direction_ray(void)
@@ -329,43 +308,48 @@ const bool *keyboard_state;
 //   apply_player_movement();
 // }
 
-// void update_display(void)
-// {
-//   // Clear screen
-//   SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255); // White background
-//   SDL_RenderClear(renderer);
-//   draw_map();
-//   draw_player();
-//   draw_dda_ray();
-//   SDL_RenderPresent(renderer);
-// }
+void update_display(void)
+{
+  SDL_Renderer *renderer = get_renderer();
 
-// void run_game_loop(void)
-// {
-//   bool loopShouldStop = false;
-//   uint64_t previous_time = SDL_GetTicks();
+  // Clear screen
+  RGBA_Colour gray = {220, 220, 220, 255};
+  SDL_SetRenderDrawColor(renderer, gray.r, gray.g, gray.b, gray.a);
+  SDL_RenderClear(renderer);
 
-//   while (!loopShouldStop)
-//   {
-//     uint64_t current_time = SDL_GetTicks();
-//     float delta_time = (current_time - previous_time) / 1000.0f; // Convert to seconds
-//     previous_time = current_time;
+  // Draw
+  draw_top_down_wall_map();
+  // draw_player();
+  // draw_dda_ray();
+  SDL_RenderPresent(renderer);
+}
 
-//     SDL_Event event;
-//     while (SDL_PollEvent(&event))
-//     {
-//       if (event.type == SDL_EVENT_QUIT)
-//       {
-//         loopShouldStop = true;
-//       }
-//     }
+void run_game_loop(void)
+{
+  bool loopShouldStop = false;
+  uint64_t previous_time = SDL_GetTicks();
 
-//     handle_player_movement(delta_time);
-//     update_display();
-//   }
-// }
+  while (!loopShouldStop)
+  {
+    uint64_t current_time = SDL_GetTicks();
+    float delta_time = (current_time - previous_time) / 1000.0f; // Convert to seconds
+    previous_time = current_time;
 
-int main(int argc, char *argv[])
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+      if (event.type == SDL_EVENT_QUIT)
+      {
+        loopShouldStop = true;
+      }
+    }
+
+    // handle_player_movement(delta_time);
+    update_display();
+  }
+}
+
+int main()
 {
   sdl_init();
 
@@ -375,10 +359,7 @@ int main(int argc, char *argv[])
 
   textures_init(renderer);
 
-  // player_init();
-  // keyboard_state = SDL_GetKeyboardState(NULL);
-
-  // run_game_loop();
+  run_game_loop();
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);

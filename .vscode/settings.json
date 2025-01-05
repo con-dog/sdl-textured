@@ -21,6 +21,7 @@
     "stdio.h": "c",
     "sdl_main.h": "c",
     "player.h": "c",
-    "peripheral-handler.h": "c"
+    "peripheral-handler.h": "c",
+    "sdl_rect.h": "c"
   },
 }

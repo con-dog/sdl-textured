@@ -1,4 +1,4 @@
-#include "./player.h"
+#include "./player-char.h"
 
 static Player player = {
     // Rect
