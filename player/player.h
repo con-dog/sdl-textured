@@ -24,6 +24,6 @@ typedef struct Player
 } Player;
 
 extern void draw_player(void);
-extern void rotate_player(float rotation_type, float delta_time);
+extern void handle_player_movement(float delta_time);
 
 #endif

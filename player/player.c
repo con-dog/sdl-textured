@@ -13,6 +13,9 @@ static Player player = {
     .angle = 0,
 };
 
+static void rotate_player(float rotation_type, float delta_time);
+static void move_player(float direction, float delta_time);
+
 extern void draw_player(void)
 {
   SDL_Renderer *renderer = get_renderer();
@@ -20,7 +23,28 @@ extern void draw_player(void)
   SDL_RenderRect(renderer, &player.rect);
 }
 
-extern void rotate_player(float rotation_type, float delta_time)
+extern void handle_player_movement(float delta_time)
+{
+  uint8_t kb_arrows_state = get_kb_arrow_input_state();
+  if (kb_arrows_state & KEY_LEFT)
+  {
+    rotate_player(ANTI_CLOCKWISE, delta_time);
+  }
+  if (kb_arrows_state & KEY_RIGHT)
+  {
+    rotate_player(CLOCKWISE, delta_time);
+  }
+  if (kb_arrows_state & KEY_UP)
+  {
+    move_player(FORWARDS, delta_time);
+  }
+  if (kb_arrows_state & KEY_DOWN)
+  {
+    move_player(BACKWARDS, delta_time);
+  }
+}
+
+static void rotate_player(float rotation_type, float delta_time)
 {
   player.angle = player.angle + (rotation_type * CAMERA_ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
   player.angle = player.angle < 0 ? 360.0f : player.angle > 360 ? 0
@@ -30,7 +54,7 @@ extern void rotate_player(float rotation_type, float delta_time)
   player.delta.y = sin(angle_rads) * 5;
 }
 
-extern void move_player(float direction, float delta_time)
+static void move_player(float direction, float delta_time)
 {
   // Calculate potential new position
   float new_x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time);
@@ -53,26 +77,5 @@ extern void move_player(float direction, float delta_time)
   {
     player.rect.x = new_x;
     player.rect.y = new_y;
-  }
-}
-
-extern void handle_player_movement(float delta_time)
-{
-  uint8_t kb_arrows_state = get_kb_arrow_input_state();
-  if (kb_arrows_state & KEY_LEFT)
-  {
-    rotate_player(ANTI_CLOCKWISE, delta_time);
-  }
-  if (kb_arrows_state & KEY_RIGHT)
-  {
-    rotate_player(CLOCKWISE, delta_time);
-  }
-  if (kb_arrows_state & KEY_UP)
-  {
-    move_player(FORWARDS, delta_time);
-  }
-  if (kb_arrows_state & KEY_DOWN)
-  {
-    move_player(BACKWARDS, delta_time);
   }
 }
