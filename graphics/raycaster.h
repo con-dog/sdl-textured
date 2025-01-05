@@ -1,6 +1,10 @@
 #ifndef RAYCASTER_H
 #define RAYCASTER_H
 
+#define RAYS_ANGLE_INC 0.5f
+
+#include "../player/player-char.h"
+
 static void cast_rays(void);
 static void draw_rays(void);
 

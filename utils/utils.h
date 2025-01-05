@@ -19,4 +19,19 @@ typedef struct Vector_2D
   float x, y;
 } Vector_2D;
 
+typedef struct Point_2D
+{
+  float x, y;
+} Point_2D;
+
+typedef struct Vector_1D
+{
+  float v;
+} Vector_1D;
+
+typedef struct Point_1D
+{
+  float p;
+} Point_1D;
+
 #endif
