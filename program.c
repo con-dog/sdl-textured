@@ -1,43 +1,5 @@
 #include "program.h"
 
-// static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
-// {
-//   char debug_text[256];
-//   snprintf(debug_text, sizeof(debug_text),
-//            "angle_rads: %.2f\n\n"
-//            "ray.x0: %.2f\n"
-//            "ray.x_dir: %.2f\n"
-//            "step_x: %.2f\n"
-//            "map_pos_x: %.2f\n"
-//            "side_dist_x: %.2f\n\n"
-//            "ray.y0: %.2f\n"
-//            "ray.y_dir: %.2f\n"
-//            "step_y: %.2f\n"
-//            "map_pos_y: %.2f\n"
-//            "side_dist_y: %.2f",
-//            angle_radians, ray.x0, ray.x_dir, dda.step.x, dda.map_pos.x, dda.side_dist.x, ray.y0, ray.y_dir, dda.step.y, dda.map_pos.y, dda.side_dist.y);
-
-//   SDL_Color text_color = {255, 0, 0, 255}; // Red text
-//   SDL_Surface *text_surface = TTF_RenderText_Blended_Wrapped(font, debug_text, strlen(debug_text), text_color, WINDOW_W / 4);
-
-//   if (text_surface)
-//   {
-//     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-//     if (text_texture)
-//     {
-//       SDL_FRect text_rect = {
-//           WINDOW_W - text_surface->w - 10, // Position from right with 10px padding
-//           10,                              // Position from top with 10px padding
-//           text_surface->w,
-//           text_surface->h};
-
-//       SDL_RenderTexture(renderer, text_texture, NULL, &text_rect);
-//       SDL_DestroyTexture(text_texture);
-//     }
-//     SDL_DestroySurface(text_surface);
-//   }
-// }
-
 // // Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
 // static void draw_dda_ray(void)
 // {
@@ -216,7 +178,8 @@ void update_display(void)
   // Draw
   draw_top_down_wall_map();
   draw_player();
-  // draw_dda_ray();
+  // cast_rays();
+
   SDL_RenderPresent(renderer);
 }
 

@@ -47,7 +47,6 @@ extern void handle_player_movement(float delta_time)
   {
     move_player(BACKWARDS, delta_time);
   }
-  cast_rays();
 }
 
 static void rotate_player(float rotation_type, float delta_time)

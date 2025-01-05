@@ -5,6 +5,21 @@
  * Cast ray/s from player to wall using Digital Differential Analysis Algorithm
  */
 static void draw_ray(Point_2D *start, Point_2D *stop);
+static void print_text(
+    float angle_radians,
+    Point_2D *ray_start_point,
+    Point_2D *ray_end_point,
+    Vector_2D *ray_dir_vector,
+    Vector_1D *step_x,
+    Vector_1D *step_y,
+    Vector_1D *delta_x,
+    Vector_1D *delta_y,
+    Point_1D *map_x,
+    Point_1D *map_y,
+    Vector_1D *dist_to_side_x,
+    Vector_1D *dist_to_side_y,
+    Point_1D *wall_x,
+    Point_1D *wall_y);
 
 extern void cast_rays(void)
 {
@@ -13,8 +28,10 @@ extern void cast_rays(void)
   float rays_start_angle = player->angle - PLAYER_FOV / 2;
   float rays_end_angle = player->angle + PLAYER_FOV / 2;
 
-  for (float current_angle = rays_start_angle; current_angle <= rays_end_angle; current_angle += RAYS_ANGLE_INC)
+  // for (float current_angle = player->angle; current_angle <= rays_end_angle; current_angle += 60)
+  for (int i = 0; i < 1; i++)
   {
+    float current_angle = player->angle;
     float angle_rads = current_angle * (M_PI / 180.0f);
 
     Point_2D ray_start_point = {
@@ -45,38 +62,55 @@ extern void cast_rays(void)
     Point_1D wall_y = {.p = ray_start_point.y};
 
     bool hit = false;
-    Wall_Side side;
+    Wall_Side_Hit side;
     while (!hit)
     {
       if (dist_to_side_x.v < dist_to_side_y.v)
       {
         // Calculate exact wall hit position for x-side
-        wall_x.p = ray_direction_vector.x < 0
+        wall_x.p = (ray_direction_vector.x < 0)
                        ? map_x.p * CELL_SIZE
                        : (map_x.p + 1) * CELL_SIZE;
         wall_y.p = ray_start_point.y + (wall_x.p - ray_start_point.x) * ray_direction_vector.y / ray_direction_vector.x;
         dist_to_side_x.v += delta_x.v;
         map_x.p += step_x.v;
-        side = Wall_X;
+        side = Wall_X_Hit;
       }
       else
       {
-        wall_y.p = ray_direction_vector.y < 0
+        wall_y.p = (ray_direction_vector.y < 0)
                        ? map_y.p * CELL_SIZE
                        : (map_y.p + 1) * CELL_SIZE;
         wall_x.p = ray_start_point.x + (wall_y.p - ray_start_point.y) * ray_direction_vector.x / ray_direction_vector.y;
         dist_to_side_y.v += delta_y.v;
         map_y.p += step_y.v;
-        side = Wall_Y;
+        side = Wall_Y_Hit;
       }
-      printf("ray_end_point: %.2f", ray_end_point.x);
-      ray_end_point.x = wall_x.p;
-      ray_end_point.y = wall_y.p;
 
+      print_text(
+          angle_rads,
+          &ray_start_point,
+          &ray_end_point,
+          &ray_direction_vector,
+          &step_x,
+          &step_y,
+          &delta_x,
+          &delta_y,
+          &map_x,
+          &map_y,
+          &dist_to_side_x,
+          &dist_to_side_y,
+          &wall_x,
+          &wall_y);
+
+      // Check if we've hit a wall
       if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] != z)
       {
-        printf("HIT~~!");
         hit = true;
+        // Only set ray endpoint when we actually hit
+        ray_end_point.x = wall_x.p;
+        ray_end_point.y = wall_y.p;
+        break;
       }
     }
 
@@ -91,6 +125,108 @@ static void draw_ray(Point_2D *start, Point_2D *stop)
   SDL_SetRenderDrawColor(renderer, ray.r, ray.g, ray.b, ray.a);
   SDL_RenderLine(renderer, start->x, start->y, stop->x, stop->y);
 }
+
+static void print_text(
+    float angle_radians,
+    Point_2D *ray_start_point,
+    Point_2D *ray_end_point,
+    Vector_2D *ray_dir_vector,
+    Vector_1D *step_x,
+    Vector_1D *step_y,
+    Vector_1D *delta_x,
+    Vector_1D *delta_y,
+    Point_1D *map_x,
+    Point_1D *map_y,
+    Vector_1D *dist_to_side_x,
+    Vector_1D *dist_to_side_y,
+    Point_1D *wall_x,
+    Point_1D *wall_y)
+{
+  char debug_text[256];
+  snprintf(debug_text, sizeof(debug_text),
+           "angle_rads: %.2f\n\n"
+           "ray.x0: %.2f\n"
+           "ray.x_dir: %.2f\n"
+           "step_x: %.2f\n"
+           "delta_x: %.2f\n"
+           "map_pos_x: %.2f\n"
+           "wall_x: %.2f\n"
+           "side_dist_x: %.2f\n\n",
+           //  "ray.y0: %.2f\n"
+           //  "ray.y_dir: %.2f\n"
+           //  "step_y: %.2f\n"
+           //  "map_pos_y: %.2f\n"
+           //  "side_dist_y: %.2f",
+           angle_radians,
+           ray_start_point->x,
+           ray_dir_vector->x,
+           step_x->v,
+           delta_x->v,
+           map_x->p,
+           wall_x->p,
+           dist_to_side_x->v);
+
+  TTF_Font *font = get_font();
+  SDL_Renderer *renderer = get_renderer();
+
+  SDL_Color text_color = {255, 0, 0, 255}; // Red text
+  SDL_Surface *text_surface = TTF_RenderText_Blended_Wrapped(font, debug_text, strlen(debug_text), text_color, WINDOW_W / 4);
+
+  if (text_surface)
+  {
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    if (text_texture)
+    {
+      SDL_FRect text_rect = {
+          WINDOW_W - text_surface->w - 10, // Position from right with 10px padding
+          10,                              // Position from top with 10px padding
+          text_surface->w,
+          text_surface->h};
+
+      SDL_RenderTexture(renderer, text_texture, NULL, &text_rect);
+      SDL_DestroyTexture(text_texture);
+    }
+    SDL_DestroySurface(text_surface);
+  }
+}
+
+// static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
+// {
+//   char debug_text[256];
+//   snprintf(debug_text, sizeof(debug_text),
+//            "angle_rads: %.2f\n\n"
+//            "ray.x0: %.2f\n"
+//            "ray.x_dir: %.2f\n"
+//            "step_x: %.2f\n"
+//            "map_pos_x: %.2f\n"
+//            "side_dist_x: %.2f\n\n"
+//            "ray.y0: %.2f\n"
+//            "ray.y_dir: %.2f\n"
+//            "step_y: %.2f\n"
+//            "map_pos_y: %.2f\n"
+//            "side_dist_y: %.2f",
+//            angle_radians, ray.x0, ray.x_dir, dda.step.x, dda.map_pos.x, dda.side_dist.x, ray.y0, ray.y_dir, dda.step.y, dda.map_pos.y, dda.side_dist.y);
+
+//   SDL_Color text_color = {255, 0, 0, 255}; // Red text
+//   SDL_Surface *text_surface = TTF_RenderText_Blended_Wrapped(font, debug_text, strlen(debug_text), text_color, WINDOW_W / 4);
+
+//   if (text_surface)
+//   {
+//     SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+//     if (text_texture)
+//     {
+//       SDL_FRect text_rect = {
+//           WINDOW_W - text_surface->w - 10, // Position from right with 10px padding
+//           10,                              // Position from top with 10px padding
+//           text_surface->w,
+//           text_surface->h};
+
+//       SDL_RenderTexture(renderer, text_texture, NULL, &text_rect);
+//       SDL_DestroyTexture(text_texture);
+//     }
+//     SDL_DestroySurface(text_surface);
+//   }
+// }
 
 // // Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
 // static void draw_dda_ray(void)

@@ -4,14 +4,16 @@
 #define RAYS_ANGLE_INC 0.5f
 
 #include "../player/player-char.h"
+#include "../sdl/sdl-handler.h"
 
-typedef enum Wall_Side
+typedef enum Wall_Side_Hit
 {
-  Wall_X,
-  Wall_Y
-} Wall_Side;
+  Wall_X_Hit,
+  Wall_Y_Hit
+} Wall_Side_Hit;
 
 extern void cast_rays(void);
+static void draw_rays(void);
 
 // // Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
 // static void draw_dda_ray(void)
