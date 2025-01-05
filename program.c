@@ -12,7 +12,7 @@ void update_display(void)
   // Draw
   draw_top_down_wall_map();
   draw_player();
-  // cast_rays();
+  cast_rays();
 
   SDL_RenderPresent(renderer);
 }

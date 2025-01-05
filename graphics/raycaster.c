@@ -107,7 +107,6 @@ extern void cast_rays(void)
       if (top_down_wall_map[GRID_ROWS * (int)map_y.p + (int)map_x.p] != z)
       {
         hit = true;
-        // Only set ray endpoint when we actually hit
         ray_end_point.x = wall_x.p;
         ray_end_point.y = wall_y.p;
         break;
