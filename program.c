@@ -14,14 +14,15 @@
 #include "program.h"
 #include "./textures/textures.h"
 #include "./textures/bricks/var-1/brick-var-1.h"
+#include "./textures/bricks/var-2/brick-var-2.h"
+#include "./textures/bricks/var-3/brick-var-3.h"
 
 SDL_Window *win;
 SDL_Renderer *renderer;
 //
 SDL_Texture *brick_var_1_texture;
-// SDL_Texture *leaves_texture;
-// SDL_Texture *flowers_texture;
-
+SDL_Texture *brick_var_2_texture;
+SDL_Texture *brick_var_3_texture;
 //
 SDL_FRect player_rect;
 SDL_Texture *player_texture;
@@ -82,47 +83,24 @@ static int font_init(void)
   return 0;
 }
 
-static int brick_var_1_texture_init(void)
+static int brick_textures_init(void)
 {
   brick_var_1_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-  if (brick_var_1_texture == NULL)
+  brick_var_2_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
+  brick_var_3_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
+
+  if (!brick_var_1_texture || !brick_var_2_texture || !brick_var_3_texture)
   {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Textures could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
     return 3;
   }
 
   SDL_UpdateTexture(brick_var_1_texture, NULL, brick_var_1.pixel_data, TEXTURE_W * 4);
+  SDL_UpdateTexture(brick_var_2_texture, NULL, brick_var_2.pixel_data, TEXTURE_W * 4);
+  SDL_UpdateTexture(brick_var_3_texture, NULL, brick_var_3.pixel_data, TEXTURE_W * 4);
 
   return 0;
 }
-
-// static int leaves_texture_init(void)
-// {
-//   leaves_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-//   if (leaves_texture == NULL)
-//   {
-//     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
-//     return 3;
-//   }
-
-//   SDL_UpdateTexture(leaves_texture, NULL, leaves_pixel_image.pixel_data, TEXTURE_W * 4);
-
-//   return 0;
-// }
-
-// static int flowers_texture_init(void)
-// {
-//   flowers_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-//   if (flowers_texture == NULL)
-//   {
-//     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
-//     return 3;
-//   }
-
-//   SDL_UpdateTexture(flowers_texture, NULL, flower_pixel_image.pixel_data, TEXTURE_W * 4);
-
-//   return 0;
-// }
 
 static void player_init(void)
 {
@@ -343,28 +321,28 @@ static void draw_dda_ray(void)
       SDL_RenderTexture(renderer, brick_var_1_texture, &src_rect, &wall_rect);
       break;
     }
-    // case B:
-    // {
-    //   SDL_FRect src_rect = {
-    //       .x = tex_x,
-    //       .y = 0,
-    //       .w = 1,
-    //       .h = TEXTURE_H};
+    case B:
+    {
+      SDL_FRect src_rect = {
+          .x = tex_x,
+          .y = 0,
+          .w = 1,
+          .h = TEXTURE_H};
 
-    //   SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
-    //   break;
-    // }
-    // case C:
-    // {
-    //   SDL_FRect src_rect = {
-    //       .x = tex_x,
-    //       .y = 0,
-    //       .w = 1,
-    //       .h = TEXTURE_H};
+      SDL_RenderTexture(renderer, brick_var_2_texture, &src_rect, &wall_rect);
+      break;
+    }
+    case C:
+    {
+      SDL_FRect src_rect = {
+          .x = tex_x,
+          .y = 0,
+          .w = 1,
+          .h = TEXTURE_H};
 
-    //   SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
-    //   break;
-    // }
+      SDL_RenderTexture(renderer, brick_var_3_texture, &src_rect, &wall_rect);
+      break;
+    }
     default:
       SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
       SDL_RenderFillRect(renderer, &wall_rect);
@@ -537,9 +515,8 @@ void run_game_loop(void)
 int main(int argc, char *argv[])
 {
   sdl_init();
-  brick_var_1_texture_init();
-  // leaves_texture_init();
-  // flowers_texture_init();
+  brick_textures_init();
+
   font_init();
   player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);

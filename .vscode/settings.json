@@ -6,7 +6,8 @@
     "complex": "c",
     "sdl_ttf.h": "c",
     "vector": "c",
-    "brick-var-1.h": "c"
+    "brick-var-1.h": "c",
+    "brick-var-2.h": "c"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }
