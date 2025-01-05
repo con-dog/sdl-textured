@@ -12,14 +12,15 @@
 #include <SDL3/SDL_rect.h>
 
 #include "program.h"
+#include "./sdl/sdl-handler.h"
 #include "./map/map.h"
 #include "./textures/textures.h"
 #include "./textures/bricks/var-1/brick-var-1.h"
 #include "./textures/bricks/var-2/brick-var-2.h"
 #include "./textures/bricks/var-3/brick-var-3.h"
 
-SDL_Window *win;
-SDL_Renderer *renderer;
+// SDL_Window *win;
+// SDL_Renderer *renderer;
 //
 SDL_Texture *brick_var_1_texture;
 SDL_Texture *brick_var_2_texture;
@@ -36,29 +37,6 @@ Player_Pos player_pos = {
 };
 //
 const bool *keyboard_state;
-
-static int sdl_init()
-{
-  if (!SDL_Init(SDL_INIT_VIDEO))
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
-    return 3;
-  }
-
-  if (!TTF_Init())
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_ttf could not initialize! TTF_Error: %s\n", SDL_GetError());
-    return 3;
-  }
-
-  if (!SDL_CreateWindowAndRenderer("2.5D Raycaster", WINDOW_W, WINDOW_H, SDL_WINDOW_RESIZABLE, &win, &renderer))
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
-    return 3;
-  }
-
-  return 0;
-}
 
 static int font_init(void)
 {
@@ -503,6 +481,9 @@ void run_game_loop(void)
 int main(int argc, char *argv[])
 {
   sdl_init();
+  SDL_Window *window = get_window();
+  SDL_Renderer *renderer = get_renderer();
+
   brick_textures_init();
 
   font_init();
@@ -512,7 +493,7 @@ int main(int argc, char *argv[])
   run_game_loop();
 
   SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(win);
+  SDL_DestroyWindow(window);
 
   TTF_CloseFont(font);
   TTF_Quit();

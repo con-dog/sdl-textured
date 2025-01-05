@@ -9,7 +9,9 @@
     "brick-var-1.h": "c",
     "brick-var-2.h": "c",
     "sdl_keyboard.h": "c",
-    "draw-map.h": "c"
+    "draw-map.h": "c",
+    "stdlib.h": "c",
+    "brick-var-3.h": "c"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }
