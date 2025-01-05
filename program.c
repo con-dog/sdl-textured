@@ -2141,7 +2141,7 @@ static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg,
 }
 
 // Draw a simple direction indicator ray from player's center
-static void draw_player_direction_line(void)
+static void draw_player_direction(void)
 {
   float length = 30.0f;
   Line_2D line = {
@@ -2150,6 +2150,11 @@ static void draw_player_direction_line(void)
   };
   create_2D_line_from_start_point(&line, player.angle, length);
   SDL_RenderLine(renderer, line.x0, line.y0, line.x1, line.y1);
+}
+
+static void draw_player_rect(void)
+{
+  SDL_RenderRect(renderer, &player.rect);
 }
 
 static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
@@ -2358,8 +2363,9 @@ static void draw_dda_ray(void)
 
 void draw_player(void)
 {
-  draw_player_direction_line();
-  SDL_RenderRect(renderer, &player.rect);
+  SDL_SetRenderDrawColor(renderer, 100, 0, 255, 255);
+  draw_player_rect();
+  draw_player_direction();
 }
 
 static void draw_map(void)
@@ -2481,7 +2487,7 @@ void update_display(void)
   SDL_RenderClear(renderer);
   draw_map();
   draw_player();
-  draw_dda_ray();
+  // draw_dda_ray();
   SDL_RenderPresent(renderer);
 }
 
