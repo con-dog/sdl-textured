@@ -16,7 +16,10 @@
     "sdl_render.h": "c",
     "config.h": "c",
     "bricks-init.h": "c",
-    "textures-init.h": "c"
+    "textures-init.h": "c",
+    "textures.h": "c",
+    "stdio.h": "c",
+    "sdl_main.h": "c"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }

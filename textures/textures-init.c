@@ -1,4 +1,5 @@
 #include "./textures-init.h"
+#include "./bricks/bricks-init.h"
 
 extern void textures_init(SDL_Renderer *renderer)
 {
