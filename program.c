@@ -2020,12 +2020,6 @@ SDL_Texture *flowers_texture;
 Player player;
 //
 
-// SDL_FRect player_rect;
-// Player_Pos player_pos = {
-//     .w = PLAYER_SIZE,
-//     .h = PLAYER_SIZE,
-// };
-//
 TTF_Font *font;
 //
 
@@ -2132,29 +2126,6 @@ static void player_init(void)
   double angle_radians = player.angle * (M_PI / 180.0);
   player.delta.x = cos(angle_radians);
   player.delta.y = sin(angle_radians);
-
-  // player.rect.x = 72.0f;
-  // player.rect.y = 72.0f;
-  // player.angle = 0.0f;
-  // player.delta.x = cos(player.angle) * 5;
-  // player.delta.y = sin(player.angle) * 5;
-  // player_rect.h = player_pos.h;
-  // player_rect.w = player_pos.w;
-  // player_rect.x = player.rect.x;
-  // player_rect.y = player.rect.y;
-
-  // player_texture = SDL_CreateTexture(renderer,
-  //                                    SDL_PIXELFORMAT_RGBA8888,
-  //                                    SDL_TEXTUREACCESS_TARGET,
-  //                                    PLAYER_SIZE * 4, // 4x resolution
-  //                                    PLAYER_SIZE * 4);
-
-  // SDL_SetTextureBlendMode(player_texture, SDL_BLENDMODE_BLEND);
-  // SDL_SetTextureScaleMode(player_texture, SDL_SCALEMODE_LINEAR);
-  // SDL_SetRenderTarget(renderer, player_texture);
-  // SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
-  // SDL_RenderClear(renderer);
-  // SDL_SetRenderTarget(renderer, NULL);
 }
 
 // Draw a simple direction indicator ray from player's center
@@ -2495,8 +2466,6 @@ void handle_player_movement(float delta_time)
   {
     move_player(BACKWARDS, delta_time);
   }
-
-  // apply_player_movement();
 }
 
 void update_display(void)
