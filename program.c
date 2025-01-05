@@ -2039,6 +2039,11 @@ const static Letter map_2D_wall[GRID_SIZE] = {
 };
 // clang-format on
 
+static double convert_deg_to_rads(double angle)
+{
+  return angle * (M_PI / 180.0f);
+}
+
 static int sdl_init()
 {
   if (!SDL_Init(SDL_INIT_VIDEO))
@@ -2123,27 +2128,28 @@ static void player_init(void)
   player.rect.h = PLAYER_H;
   player.angle = 0.0f;
 
-  double angle_radians = player.angle * (M_PI / 180.0);
+  double angle_radians = convert_deg_to_rads(player.angle);
   player.delta.x = cos(angle_radians);
   player.delta.y = sin(angle_radians);
 }
 
-// Draw a simple direction indicator ray from player's center
-static void draw_player_direction_ray(void)
+static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg, float length)
 {
-  static Ray_Pos player_ray = {
-      .length = 30.0f, // Fixed length for direction indicator
+  double angle_rads = convert_deg_to_rads(angle_deg);
+  out_line->x1 = out_line->x0 + length * cos(angle_rads);
+  out_line->y1 = out_line->y0 + length * sin(angle_rads);
+}
+
+// Draw a simple direction indicator ray from player's center
+static void draw_player_direction_line(void)
+{
+  float length = 30.0f;
+  Line_2D line = {
+      .x0 = player.rect.x + PLAYER_W / 2,
+      .y0 = player.rect.y + PLAYER_H / 2,
   };
-  // Center ray start point on player
-  player_ray.x0 = player.rect.x + (PLAYER_W / 2);
-  player_ray.y0 = player.rect.y + (PLAYER_H / 2);
-
-  // Convert angle to radians and calculate end point using trig
-  float angle_radians = (player.angle) * (M_PI / 180.0);
-  player_ray.x1 = player_ray.x0 + player_ray.length * cos(angle_radians);
-  player_ray.y1 = player_ray.y0 + player_ray.length * sin(angle_radians);
-
-  SDL_RenderLine(renderer, player_ray.x0, player_ray.y0, player_ray.x1, player_ray.y1);
+  create_2D_line_from_start_point(&line, player.angle, length);
+  SDL_RenderLine(renderer, line.x0, line.y0, line.x1, line.y1);
 }
 
 static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
@@ -2352,7 +2358,7 @@ static void draw_dda_ray(void)
 
 void draw_player(void)
 {
-  draw_player_direction_ray();
+  draw_player_direction_line();
   SDL_RenderRect(renderer, &player.rect);
 }
 
