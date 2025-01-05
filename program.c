@@ -12,6 +12,7 @@
 #include <SDL3/SDL_rect.h>
 
 #include "program.h"
+#include "./map/map.h"
 #include "./textures/textures.h"
 #include "./textures/bricks/var-1/brick-var-1.h"
 #include "./textures/bricks/var-2/brick-var-2.h"
@@ -35,19 +36,6 @@ Player_Pos player_pos = {
 };
 //
 const bool *keyboard_state;
-
-// clang-format off
-const static Letter map_2D_wall[GRID_SIZE] = {
-  A, A, A, A, A, A, A, A,
-  A, z, B, z, z, z, z, A,
-  A, z, B, z, z, z, z, A,
-  A, z, B, z, C, C, z, A,
-  A, z, B, z, C, C, z, A,
-  A, z, z, z, z, z, z, A,
-  A, z, z, z, z, z, z, A,
-  A, A, A, A, C, C, C, C,
-};
-// clang-format on
 
 static int sdl_init()
 {

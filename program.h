@@ -6,11 +6,6 @@
 #define WINDOW_H 512
 // Font
 #define FONT_SMALL 12
-// Map
-#define CELL_SIZE 64.0f
-#define GRID_ROWS 8
-#define GRID_COLS 8
-#define GRID_SIZE (GRID_ROWS * GRID_COLS)
 // Player
 #define PLAYER_SIZE 8.0f
 #define ROTATION_STEP 5.0f
@@ -55,37 +50,5 @@ typedef struct DDA_Algo
   Vector_2D side_dist;
   Vector_2D wall;
 } DDA_Algo;
-
-//
-typedef enum Letter
-{
-  z, // 0
-  A,
-  B,
-  C,
-  D,
-  E,
-  F,
-  G,
-  H,
-  I,
-  J,
-  K,
-  L,
-  M,
-  N,
-  O,
-  P,
-  Q,
-  R,
-  S,
-  T,
-  U,
-  V,
-  W,
-  X,
-  Y,
-  Z
-} Letter;
 
 #endif

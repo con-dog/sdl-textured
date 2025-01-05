@@ -7,7 +7,9 @@
     "sdl_ttf.h": "c",
     "vector": "c",
     "brick-var-1.h": "c",
-    "brick-var-2.h": "c"
+    "brick-var-2.h": "c",
+    "sdl_keyboard.h": "c",
+    "draw-map.h": "c"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }
