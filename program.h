@@ -13,10 +13,6 @@
 // #define BACKWARDS -1.0f
 // #define FORWARDS 1.0f
 // Input helpers
-#define KEY_UP (1 << 0)
-#define KEY_DOWN (1 << 1)
-#define KEY_LEFT (1 << 2)
-#define KEY_RIGHT (1 << 3)
 
 // typedef struct Player_Pos
 // {

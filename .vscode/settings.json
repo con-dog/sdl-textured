@@ -19,6 +19,8 @@
     "textures-init.h": "c",
     "textures.h": "c",
     "stdio.h": "c",
-    "sdl_main.h": "c"
+    "sdl_main.h": "c",
+    "player.h": "c",
+    "peripheral-handler.h": "c"
   },
 }
