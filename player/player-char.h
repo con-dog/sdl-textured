@@ -1,8 +1,8 @@
 #ifndef PLAYER_CHAR_H
 #define PLAYER_CHAR_H
 
-#define PLAYER_W 8.0f
-#define PLAYER_H 8.0f
+#define PLAYER_W 4.0f
+#define PLAYER_H 4.0f
 #define PLAYER_SPEED 15.0f
 #define PLAYER_ROTATION_SPEED 30.0f
 #define PLAYER_INTERACTION_DISTANCE 2.0f
