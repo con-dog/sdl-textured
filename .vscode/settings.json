@@ -11,7 +11,12 @@
     "sdl_keyboard.h": "c",
     "draw-map.h": "c",
     "stdlib.h": "c",
-    "brick-var-3.h": "c"
+    "brick-var-3.h": "c",
+    "sdl-handler.h": "c",
+    "sdl_render.h": "c",
+    "config.h": "c",
+    "bricks-init.h": "c",
+    "textures-init.h": "c"
   },
   "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }

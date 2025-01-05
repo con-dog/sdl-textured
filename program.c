@@ -15,18 +15,10 @@
 #include "./sdl/sdl-handler.h"
 #include "./map/map.h"
 #include "./textures/textures.h"
-#include "./textures/bricks/var-1/brick-var-1.h"
-#include "./textures/bricks/var-2/brick-var-2.h"
-#include "./textures/bricks/var-3/brick-var-3.h"
+#include "./textures/textures-init.h"
 
-SDL_Texture *brick_var_1_texture;
-SDL_Texture *brick_var_2_texture;
-SDL_Texture *brick_var_3_texture;
-//
 SDL_FRect player_rect;
 SDL_Texture *player_texture;
-//
-TTF_Font *font;
 //
 Player_Pos player_pos = {
     .w = PLAYER_SIZE,
@@ -34,36 +26,6 @@ Player_Pos player_pos = {
 };
 //
 const bool *keyboard_state;
-
-static int font_init(void)
-{
-  font = TTF_OpenFont("./fonts/PressStart2P-Regular.ttf", FONT_SMALL);
-  if (!font)
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load font! TTF_Error: %s\n", SDL_GetError());
-    return 3;
-  }
-  return 0;
-}
-
-static int brick_textures_init(void)
-{
-  brick_var_1_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-  brick_var_2_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-  brick_var_3_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
-
-  if (!brick_var_1_texture || !brick_var_2_texture || !brick_var_3_texture)
-  {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Textures could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
-    return 3;
-  }
-
-  SDL_UpdateTexture(brick_var_1_texture, NULL, brick_var_1.pixel_data, TEXTURE_W * 4);
-  SDL_UpdateTexture(brick_var_2_texture, NULL, brick_var_2.pixel_data, TEXTURE_W * 4);
-  SDL_UpdateTexture(brick_var_3_texture, NULL, brick_var_3.pixel_data, TEXTURE_W * 4);
-
-  return 0;
-}
 
 static void player_init(void)
 {
@@ -319,46 +281,6 @@ void draw_player(void)
   SDL_RenderRect(renderer, &player_rect);
 }
 
-static void draw_map(void)
-{
-  static bool initialized = false;
-  static SDL_FRect black_rects[GRID_SIZE];
-  static SDL_FRect white_rects[GRID_SIZE];
-  static int black_count = 0;
-  static int white_count = 0;
-  static float offset = 0.1f;
-
-  if (!initialized)
-  {
-    for (int i = 0; i < GRID_ROWS; i++)
-    {
-      for (int j = 0; j < GRID_COLS; j++)
-      {
-        SDL_FRect rect;
-        rect.h = CELL_SIZE * (1.0f - offset);
-        rect.w = CELL_SIZE * (1.0f - offset);
-        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2);
-        rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
-        if (map_2D_wall[i * GRID_COLS + j])
-        {
-          black_rects[black_count++] = rect;
-        }
-        else
-        {
-          white_rects[white_count++] = rect;
-        }
-      }
-    }
-    initialized = true;
-  }
-
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderFillRects(renderer, white_rects, white_count);
-
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderFillRects(renderer, black_rects, black_count);
-}
-
 void rotate_player(float rotation_type, float delta_time)
 {
   player_pos.angle = player_pos.angle + (rotation_type * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
@@ -478,12 +400,15 @@ void run_game_loop(void)
 int main(int argc, char *argv[])
 {
   sdl_init();
+
   SDL_Window *window = get_window();
   SDL_Renderer *renderer = get_renderer();
+  TTF_Font *font = get_font();
 
-  brick_textures_init();
+  textures_init(renderer);
 
-  font_init();
+  // brick_textures_init();
+
   player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);
 

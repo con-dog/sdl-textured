@@ -1,9 +1,10 @@
 
-#include "../config/config.h"
 #include "./sdl-handler.h"
+#include "../config/config.h"
 
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
+static TTF_Font *font;
 
 extern SDL_Window *get_window(void)
 {
@@ -23,10 +24,16 @@ extern SDL_Renderer *get_renderer(void)
   return renderer;
 }
 
+extern TTF_Font *get_font(void)
+{
+  return font;
+}
+
 extern int sdl_init()
 {
   sdl_video_init();
   sdl_ttf_init();
+  sdl_ttf_font_init();
   sdl_window_renderer_init();
 }
 
@@ -55,4 +62,15 @@ static int sdl_window_renderer_init(void)
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
     return 3;
   }
+}
+
+static int sdl_ttf_font_init(void)
+{
+  font = TTF_OpenFont("../fonts/PressStart2P-Regular.ttf", FONT_SMALL);
+  if (!font)
+  {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load font! TTF_Error: %s\n", SDL_GetError());
+    return 3;
+  }
+  return 0;
 }
