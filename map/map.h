@@ -10,9 +10,9 @@
 typedef enum Letter
 {
   /* NO WALL */
-  z,        // ! NO WALL
+  z,                // ! EMPTY
   /* BRICK WALLS */
-  A, B, C, D, // * RED
+  A, B, C, D,       // * RED
   E, F, G, H,
   I, J, K, L,
   M, N, O,
