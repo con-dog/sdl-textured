@@ -62,14 +62,20 @@ static void rotate_player(float rotation_type, float delta_time)
 static void move_player(float direction, float delta_time)
 {
   // Calculate potential new position
-  float new_x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time);
-  float new_y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time);
+  Point_2D new_position = {
+      .x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time),
+      .y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time),
+  };
+
+  unsigned int wall_map_rows;
+  unsigned int wall_map_cols;
+  const Letter *top_down_wall_map = get_top_down_wall_map(&wall_map_rows, &wall_map_cols);
 
   // Calculate offsets from players hit-box
-  int hitbox_top_left = top_down_wall_map[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int hitbox_top_right = top_down_wall_map[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int hitbox_bottom_left = top_down_wall_map[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int hitbox_bottom_right = top_down_wall_map[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int hitbox_top_left = top_down_wall_map[((int)((new_position.y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_position.x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int hitbox_top_right = top_down_wall_map[((int)((new_position.y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_position.x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int hitbox_bottom_left = top_down_wall_map[((int)((new_position.y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_position.x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int hitbox_bottom_right = top_down_wall_map[((int)((new_position.y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_position.x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
 
   // TODO - Allow it so player can still "slide" along walls
   // Only move it none of the corners would hit a wall
@@ -77,7 +83,7 @@ static void move_player(float direction, float delta_time)
   if (hitbox_top_left == z && hitbox_top_right == z &&
       hitbox_bottom_left == z && hitbox_bottom_right == z)
   {
-    player.rect.x = new_x;
-    player.rect.y = new_y;
+    player.rect.x = new_position.x;
+    player.rect.y = new_position.y;
   }
 }
