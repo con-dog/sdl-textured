@@ -16,6 +16,11 @@ static Player player = {
 static void rotate_player(float rotation_type, float delta_time);
 static void move_player(float direction, float delta_time);
 
+extern Player *get_player(void)
+{
+  return &player;
+}
+
 extern void draw_player(void)
 {
   SDL_Renderer *renderer = get_renderer();

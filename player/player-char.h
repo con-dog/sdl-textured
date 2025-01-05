@@ -24,6 +24,7 @@ typedef struct Player
   double angle;    // Angle in Degrees
 } Player;
 
+extern Player *get_player(void);
 extern void draw_player(void);
 extern void handle_player_movement(float delta_time);
 
