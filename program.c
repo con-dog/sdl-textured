@@ -1,18 +1,4 @@
-#define TEXTURE_W 64
-#define TEXTURE_H 64
 
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_keyboard.h>
-#include <SDL3/SDL_main.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_rect.h>
 
 #include "program.h"
 
@@ -2031,15 +2017,18 @@ SDL_Texture *leaves_texture;
 SDL_Texture *flowers_texture;
 
 //
-SDL_FRect player_rect;
-SDL_Texture *player_texture;
+Player player;
+//
+
+// SDL_FRect player_rect;
+// Player_Pos player_pos = {
+//     .w = PLAYER_SIZE,
+//     .h = PLAYER_SIZE,
+// };
 //
 TTF_Font *font;
 //
-Player_Pos player_pos = {
-    .w = PLAYER_SIZE,
-    .h = PLAYER_SIZE,
-};
+
 //
 const bool *keyboard_state;
 
@@ -2134,28 +2123,38 @@ static int flowers_texture_init(void)
 
 static void player_init(void)
 {
-  player_pos.x = 72.0f;
-  player_pos.y = 72.0f;
-  player_pos.angle = 0.0f;
-  player_pos.dx = cos(player_pos.angle) * 5;
-  player_pos.dy = sin(player_pos.angle) * 5;
-  player_rect.h = player_pos.h;
-  player_rect.w = player_pos.w;
-  player_rect.x = player_pos.x;
-  player_rect.y = player_pos.y;
+  player.rect.x = 72.0f;
+  player.rect.y = 72.0f;
+  player.rect.w = PLAYER_W;
+  player.rect.h = PLAYER_H;
+  player.angle = 0.0f;
 
-  player_texture = SDL_CreateTexture(renderer,
-                                     SDL_PIXELFORMAT_RGBA8888,
-                                     SDL_TEXTUREACCESS_TARGET,
-                                     PLAYER_SIZE * 4, // 4x resolution
-                                     PLAYER_SIZE * 4);
+  double angle_radians = player.angle * (M_PI / 180.0);
+  player.delta.x = cos(angle_radians);
+  player.delta.y = sin(angle_radians);
 
-  SDL_SetTextureBlendMode(player_texture, SDL_BLENDMODE_BLEND);
-  SDL_SetTextureScaleMode(player_texture, SDL_SCALEMODE_LINEAR);
-  SDL_SetRenderTarget(renderer, player_texture);
-  SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
-  SDL_RenderClear(renderer);
-  SDL_SetRenderTarget(renderer, NULL);
+  // player.rect.x = 72.0f;
+  // player.rect.y = 72.0f;
+  // player.angle = 0.0f;
+  // player.delta.x = cos(player.angle) * 5;
+  // player.delta.y = sin(player.angle) * 5;
+  // player_rect.h = player_pos.h;
+  // player_rect.w = player_pos.w;
+  // player_rect.x = player.rect.x;
+  // player_rect.y = player.rect.y;
+
+  // player_texture = SDL_CreateTexture(renderer,
+  //                                    SDL_PIXELFORMAT_RGBA8888,
+  //                                    SDL_TEXTUREACCESS_TARGET,
+  //                                    PLAYER_SIZE * 4, // 4x resolution
+  //                                    PLAYER_SIZE * 4);
+
+  // SDL_SetTextureBlendMode(player_texture, SDL_BLENDMODE_BLEND);
+  // SDL_SetTextureScaleMode(player_texture, SDL_SCALEMODE_LINEAR);
+  // SDL_SetRenderTarget(renderer, player_texture);
+  // SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
+  // SDL_RenderClear(renderer);
+  // SDL_SetRenderTarget(renderer, NULL);
 }
 
 // Draw a simple direction indicator ray from player's center
@@ -2165,11 +2164,11 @@ static void draw_player_direction_ray(void)
       .length = 30.0f, // Fixed length for direction indicator
   };
   // Center ray start point on player
-  player_ray.x0 = player_pos.x + (PLAYER_SIZE / 2);
-  player_ray.y0 = player_pos.y + (PLAYER_SIZE / 2);
+  player_ray.x0 = player.rect.x + (PLAYER_W / 2);
+  player_ray.y0 = player.rect.y + (PLAYER_H / 2);
 
   // Convert angle to radians and calculate end point using trig
-  float angle_radians = (player_pos.angle) * (M_PI / 180.0);
+  float angle_radians = (player.angle) * (M_PI / 180.0);
   player_ray.x1 = player_ray.x0 + player_ray.length * cos(angle_radians);
   player_ray.y1 = player_ray.y0 + player_ray.length * sin(angle_radians);
 
@@ -2218,8 +2217,8 @@ static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
 static void draw_dda_ray(void)
 {
   // Calculate start and end angles for 60° FOV centered on player angle
-  float start_angle = player_pos.angle - 30; // 30° left of center
-  float end_angle = player_pos.angle + 30;   // 30° right of center
+  float start_angle = player.angle - 30; // 30° left of center
+  float end_angle = player.angle + 30;   // 30° right of center
   Uint8 r, g, b;
   for (float current_angle = start_angle; current_angle <= end_angle; current_angle += 0.25f)
   {
@@ -2227,8 +2226,8 @@ static void draw_dda_ray(void)
 
     Ray_Pos ray = {
         // Center ray start position on player
-        .x0 = player_pos.x + (PLAYER_SIZE / 2),
-        .y0 = player_pos.y + (PLAYER_SIZE / 2),
+        .x0 = player.rect.x + (PLAYER_W / 2),
+        .y0 = player.rect.y + (PLAYER_H / 2),
         // Calculate ray direction vector from angle
         .x_dir = cos(angle_radians),
         .y_dir = sin(angle_radians),
@@ -2303,7 +2302,7 @@ static void draw_dda_ray(void)
     float ray_screen_pos = ((current_angle - start_angle) / 60.0f) * (WINDOW_W / 2) + WINDOW_W / 2;
 
     // Calculate perpendicular distance to avoid fisheye effect
-    float perp_distance = hypotenuse * cos((current_angle - player_pos.angle) * (M_PI / 180.0));
+    float perp_distance = hypotenuse * cos((current_angle - player.angle) * (M_PI / 180.0));
 
     // Calculate line height using perpendicular distance
     float line_h = (CELL_SIZE * WINDOW_H) / perp_distance;
@@ -2383,7 +2382,7 @@ static void draw_dda_ray(void)
 void draw_player(void)
 {
   draw_player_direction_ray();
-  SDL_RenderRect(renderer, &player_rect);
+  SDL_RenderRect(renderer, &player.rect);
 }
 
 static void draw_map(void)
@@ -2428,25 +2427,25 @@ static void draw_map(void)
 
 void rotate_player(float rotation_type, float delta_time)
 {
-  player_pos.angle = player_pos.angle + (rotation_type * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
-  player_pos.angle = player_pos.angle < 0.0f ? 360.0f : player_pos.angle;
-  double angle_radians = player_pos.angle * (M_PI / 180);
-  player_pos.dx = cos(angle_radians) * 5;
-  player_pos.dy = sin(angle_radians) * 5;
+  player.angle = player.angle + (rotation_type * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
+  player.angle = player.angle < 0.0f ? 360.0f : player.angle;
+  double angle_radians = player.angle * (M_PI / 180);
+  player.delta.x = cos(angle_radians) * 5;
+  player.delta.y = sin(angle_radians) * 5;
 }
 
 void move_player(float direction, float delta_time)
 {
   // Calculate potential new position
-  float new_x = player_pos.x + (direction * player_pos.dx * PLAYER_SPEED * delta_time);
-  float new_y = player_pos.y + (direction * player_pos.dy * PLAYER_SPEED * delta_time);
+  float new_x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time);
+  float new_y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time);
 
   // Calculate the map grid coordinates for checking collisions
   int map_x = (int)(new_x / CELL_SIZE);
   int map_y = (int)(new_y / CELL_SIZE);
 
   // Add offset for the player's size when checking corners
-  float offset = PLAYER_SIZE * 0.5f; // Half the player's size
+  float offset = PLAYER_W * 0.5f; // Half the player's size
 
   // Check all four corners of the player's hitbox
   int top_left = map_2D_wall[((int)((new_y - offset) / CELL_SIZE) * GRID_COLS) + (int)((new_x - offset) / CELL_SIZE)];
@@ -2457,15 +2456,9 @@ void move_player(float direction, float delta_time)
   // Only move if none of the corners would hit a wall
   if (top_left == z && top_right == z && bottom_left == z && bottom_right == z)
   {
-    player_pos.x = new_x;
-    player_pos.y = new_y;
+    player.rect.x = new_x;
+    player.rect.y = new_y;
   }
-}
-
-void apply_player_movement()
-{
-  player_rect.x = player_pos.x;
-  player_rect.y = player_pos.y;
 }
 
 uint8_t get_kb_arrow_input_state(void)
@@ -2503,7 +2496,7 @@ void handle_player_movement(float delta_time)
     move_player(BACKWARDS, delta_time);
   }
 
-  apply_player_movement();
+  // apply_player_movement();
 }
 
 void update_display(void)

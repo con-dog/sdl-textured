@@ -12,7 +12,8 @@
 #define GRID_COLS 8
 #define GRID_SIZE (GRID_ROWS * GRID_COLS)
 // Player
-#define PLAYER_SIZE 8.0f
+#define PLAYER_W 8.0f
+#define PLAYER_H 8.0f
 #define ROTATION_STEP 5.0f
 #define PLAYER_SPEED 15.0f
 #define PLAYER_ROTATION_SPEED 30.0f
@@ -28,6 +29,47 @@
 #define KEY_LEFT (1 << 2)
 #define KEY_RIGHT (1 << 3)
 
+#define TEXTURE_W 64
+#define TEXTURE_H 64
+
+#include <math.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3/SDL_hints.h>
+#include <SDL3/SDL_keyboard.h>
+#include <SDL3/SDL_main.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_rect.h>
+
+typedef float Vector_1D;
+typedef struct Vector_2D
+{
+  float x, y;
+} Vector_2D;
+
+typedef float Point_1D;
+typedef struct Point_2D
+{
+  float x, y;
+} Point_2D;
+
+typedef struct Line_2D
+{
+  float x0, x1;
+  float y0, y1;
+} Line_2D;
+
+typedef struct Player
+{
+  SDL_FRect rect;
+  Vector_2D delta;
+  double angle; // degrees
+} Player;
+
 typedef struct Player_Pos
 {
   float x, y, dx, dy; // Coordinates
@@ -41,11 +83,6 @@ typedef struct Ray_Pos
   float x_dir, y_dir;
   const float length;
 } Ray_Pos;
-
-typedef struct Vector_2D
-{
-  float x, y;
-} Vector_2D;
 
 typedef struct DDA_Algo
 {
