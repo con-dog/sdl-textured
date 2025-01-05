@@ -18,7 +18,7 @@
 #define ROTATION_STEP 5.0f
 #define PLAYER_SPEED 15.0f
 #define PLAYER_ROTATION_SPEED 30.0f
-#define INTERACTION_DISTANCE 5.0f
+#define PLAYER_INTERACTION_DISTANCE 5.0f
 // Math Utils
 #define CLOCKWISE 1
 #define ANTI_CLOCKWISE -1
@@ -57,14 +57,22 @@ typedef struct Vector_2D
 typedef float Point_1D;
 typedef struct Point_2D
 {
-  float x, y;
+  Point_1D x, y;
 } Point_2D;
 
 typedef struct Line_2D
 {
-  float x0, x1;
-  float y0, y1;
+  Point_2D start;
+  Point_2D stop;
 } Line_2D;
+
+typedef struct Rect_2D
+{
+  Point_2D tl;
+  Point_2D tr;
+  Point_2D bl;
+  Point_2D br;
+} Rect_2D;
 
 typedef struct Player
 {

@@ -2136,8 +2136,8 @@ static void player_init(void)
 static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg, float length)
 {
   double angle_rads = convert_deg_to_rads(angle_deg);
-  out_line->x1 = out_line->x0 + length * cos(angle_rads);
-  out_line->y1 = out_line->y0 + length * sin(angle_rads);
+  out_line->stop.x = out_line->start.x + length * cos(angle_rads);
+  out_line->stop.y = out_line->start.y + length * sin(angle_rads);
 }
 
 // Draw a simple direction indicator ray from player's center
@@ -2145,11 +2145,11 @@ static void draw_player_direction(void)
 {
   float length = 30.0f;
   Line_2D line = {
-      .x0 = player.rect.x + PLAYER_W / 2,
-      .y0 = player.rect.y + PLAYER_H / 2,
+      .start.x = player.rect.x + PLAYER_W / 2,
+      .start.y = player.rect.y + PLAYER_H / 2,
   };
   create_2D_line_from_start_point(&line, player.angle, length);
-  SDL_RenderLine(renderer, line.x0, line.y0, line.x1, line.y1);
+  SDL_RenderLine(renderer, line.start.x, line.start.y, line.stop.x, line.stop.y);
 }
 
 static void draw_player_rect(void)
@@ -2420,24 +2420,38 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(angle_rads) * MOTION_DELTA_MULTIPLIER;
 }
 
+int convert_world_2D_point_to_hit_box(Point_2D *world_point, float offset)
+{
+  Rect_2D world_hit_box = {
+      .tl.x = world_point->x - offset,
+      // TODO
+
+  };
+
+  Rect_2D normalized_hit_box...;
+
+  array_index = ...;
+}
+
 void move_player(float direction, float delta_time)
 {
-  // Calculate potential new position
-  float new_x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time);
-  float new_y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time);
+  Point_2D new_pos = {
+    .x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time),
+    .y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time),
+  }
 
-  // Calculate the map grid coordinates for checking collisions
-  int map_x = (int)(new_x / CELL_SIZE);
-  int map_y = (int)(new_y / CELL_SIZE);
+  // // Calculate the map grid coordinates for checking collisions
+  // int map_x = (int)(new_x / CELL_SIZE);
+  // int map_y = (int)(new_y / CELL_SIZE);
 
-  // Add offset for the player's size when checking corners
-  float offset = PLAYER_W * 0.5f; // Half the player's size
+  // // Add offset for the player's size when checking corners
+  // float offset = PLAYER_W * 0.5f; // Half the player's size
 
   // Check all four corners of the player's hitbox
-  int top_left = map_2D_wall[((int)((new_y - offset) / CELL_SIZE) * GRID_COLS) + (int)((new_x - offset) / CELL_SIZE)];
-  int top_right = map_2D_wall[((int)((new_y - offset) / CELL_SIZE) * GRID_COLS) + (int)((new_x + offset) / CELL_SIZE)];
-  int bottom_left = map_2D_wall[((int)((new_y + offset) / CELL_SIZE) * GRID_COLS) + (int)((new_x - offset) / CELL_SIZE)];
-  int bottom_right = map_2D_wall[((int)((new_y + offset) / CELL_SIZE) * GRID_COLS) + (int)((new_x + offset) / CELL_SIZE)];
+  int top_left = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int top_right = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int bottom_left = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  int bottom_right = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
 
   // Only move if none of the corners would hit a wall
   if (top_left == z && top_right == z && bottom_left == z && bottom_right == z)
