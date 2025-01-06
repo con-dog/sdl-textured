@@ -2312,6 +2312,12 @@ static void cast_rays_from_player(void)
 
       unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
     }
+    // Brightness transformations
+    // Uint8 brightness = (Uint8)(255.0f * (1.0f - (perpendicular_distance / (64 * 16))));
+    Uint8 brightness = (Uint8)(255.0f * (1.0f - log10f(1.0f + (9.0f * perpendicular_distance / (64 * 16)))));
+    SDL_SetTextureColorMod(brick_texture, brightness, brightness, brightness);
+    SDL_SetTextureColorMod(leaves_texture, brightness, brightness, brightness);
+    SDL_SetTextureColorMod(flowers_texture, brightness, brightness, brightness);
 
     unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
     switch (grid_walls[grid_1D_array_index])
@@ -2334,6 +2340,16 @@ static void cast_rays_from_player(void)
           .w = 1,
           .h = TEXTURE_H};
       SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
+      break;
+    }
+    case C:
+    {
+      SDL_FRect src_rect = {
+          .x = texture_x,
+          .y = 0,
+          .w = 1,
+          .h = TEXTURE_H};
+      SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
       break;
     }
     default:
@@ -2438,11 +2454,11 @@ Rect_2D convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, floa
   return player_hit_box_normalized;
 }
 
-void move_player(float direction, float delta_time)
+void move_player(float direction, bool is_sprinting, float delta_time)
 {
   Point_2D new_pos = {
-      .x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time),
-      .y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time),
+      .x = player.rect.x + (direction * player.delta.x * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
+      .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
   };
 
   Rect_2D new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
@@ -2482,7 +2498,12 @@ uint8_t get_kb_arrow_input_state(void)
 void handle_player_movement(float delta_time)
 {
   uint8_t arrows_state = get_kb_arrow_input_state();
+  bool is_sprinting = false;
 
+  if (keyboard_state[SDL_SCANCODE_LSHIFT] || keyboard_state[SDL_SCANCODE_RSHIFT])
+  {
+    is_sprinting = true;
+  }
   if (arrows_state & KEY_LEFT)
   {
     rotate_player(ANTI_CLOCKWISE, delta_time);
@@ -2493,17 +2514,16 @@ void handle_player_movement(float delta_time)
   }
   if (arrows_state & KEY_UP)
   {
-    move_player(FORWARDS, delta_time);
+    move_player(FORWARDS, is_sprinting, delta_time);
   }
   if (arrows_state & KEY_DOWN)
   {
-    move_player(BACKWARDS, delta_time);
+    move_player(BACKWARDS, is_sprinting, delta_time);
   }
 }
 
 void update_display(void)
 {
-  // Clear screen
   SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255); // White background
   SDL_RenderClear(renderer);
   draw_map();
