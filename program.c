@@ -2196,45 +2196,68 @@ static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
 
 static void cast_rays_from_player(void)
 {
-  // Calculate start and end angles for 60° FOV centered on player angle
-  Degrees start_angle = player.angle - 30; // 30° left of center
-  Degrees end_angle = player.angle + 30;   // 30° right of center
+  Degrees start_angle = player.angle - PLAYER_FOV / 2;
+  Degrees end_angle = player.angle + PLAYER_FOV / 2;
   Uint8 r, g, b;
-  for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 0.25f)
+
+  for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 1.0f)
   {
     Radians radians = convert_deg_to_rads(current_angle);
 
-    Ray_Pos ray = {
-        // Center ray start position on player
-        .x0 = player.rect.x + (PLAYER_W / 2),
-        .y0 = player.rect.y + (PLAYER_H / 2),
-        // Calculate ray direction vector from angle
-        .x_dir = cos(radians),
-        .y_dir = sin(radians),
-    };
+    // Ray_Pos ray = {
+    //     // Center ray start position on player
+    //     .x0 = player.rect.x + (PLAYER_W / 2),
+    //     .y0 = player.rect.y + (PLAYER_H / 2),
+    //     // Calculate ray direction vector from angle
+    //     .x_dir = cos(radians),
+    //     .y_dir = sin(radians),
+    // };
 
-    DDA_Algo dda = {
-        // Determine step direction (+1 or -1) for x and y based on ray direction
-        .step.x = (ray.x_dir >= 0) ? 1 : -1,
-        .step.y = (ray.y_dir >= 0) ? 1 : -1,
-        // Calculate delta distances - distance along ray from one x or y side to next
-        .delta.x = fabs(1.0 / ray.x_dir),
-        .delta.y = fabs(1.0 / ray.y_dir),
-        // Get player's current map grid cell position
-        .map_pos.x = floorf(ray.x0 / CELL_SIZE),
-        .map_pos.y = floorf(ray.y0 / CELL_SIZE),
-        // Calculate initial side distances - distance from start to first x or y grid line
-        .side_dist.x = (ray.x_dir < 0)
-                           ? ((ray.x0 / CELL_SIZE) - dda.map_pos.x) * dda.delta.x
-                           : (dda.map_pos.x + 1.0f - (ray.x0 / CELL_SIZE)) * dda.delta.x,
-        .side_dist.y = (ray.y_dir < 0)
-                           ? ((ray.y0 / CELL_SIZE) - dda.map_pos.y) * dda.delta.y
-                           : (dda.map_pos.y + 1.0f - (ray.y0 / CELL_SIZE)) * dda.delta.y,
-        .wall.x = ray.x0,
-        .wall.y = ray.y0,
-    };
+    Line_2D ray;
 
-    print_text(radians, ray, dda);
+    ray.start.x = player.rect.x + (PLAYER_W / 2);
+    ray.start.y = player.rect.y + (PLAYER_H / 2);
+
+    // DDA_Algo dda = {
+    //     // Determine step direction (+1 or -1) for x and y based on ray direction
+    //     .step.x = (ray.x_dir >= 0) ? 1 : -1,
+    //     .step.y = (ray.y_dir >= 0) ? 1 : -1,
+    //     // Calculate delta distances - distance along ray from one x or y side to next
+    //     .delta.x = fabs(1.0 / ray.x_dir),
+    //     .delta.y = fabs(1.0 / ray.y_dir),
+    //     // Get player's current map grid cell position
+    //     .map_pos.x = floorf(ray.x0 / CELL_SIZE),
+    //     .map_pos.y = floorf(ray.y0 / CELL_SIZE),
+    //     // Calculate initial side distances - distance from start to first x or y grid line
+    //     .side_dist.x = (ray.x_dir < 0) ? ((ray.x0 / CELL_SIZE) - dda.map_pos.x) * dda.delta.x : (dda.map_pos.x + 1.0f - (ray.x0 / CELL_SIZE)) * dda.delta.x,
+    //     .side_dist.y = (ray.y_dir < 0) ? ((ray.y0 / CELL_SIZE) - dda.map_pos.y) * dda.delta.y : (dda.map_pos.y + 1.0f - (ray.y0 / CELL_SIZE)) * dda.delta.y,
+    //     .wall.x = ray.x0,
+    //     .wall.y = ray.y0,
+    // };
+
+    // print_text(radians, ray, dda);
+
+    Vector_1D x_direction = cos(radians);
+    Vector_1D y_direction = sin(radians);
+    Vector_1D step_x = (x_direction >= 0) ? 1 : -1;
+    Vector_1D step_y = (y_direction >= 0) ? 1 : -1;
+    Vector_1D delta_x = fabs(1.0f / x_direction);
+    Vector_1D delta_y = fabs(1.0f / y_direction);
+
+    Grid_Point_1D grid_x = floorf(ray.start.x / CELL_SIZE);
+    Grid_Point_1D grid_y = floorf(ray.start.y / CELL_SIZE);
+    Point_1D world_x_normalized = ray.start.x / CELL_SIZE;
+    Point_1D world_y_normalized = ray.start.y / CELL_SIZE;
+
+    Vector_1D x_distance_to_next_vertical_cell_edge = (x_direction < 0)
+                                                          ? (world_x_normalized - grid_x) * delta_x
+                                                          : (grid_x + 1 - world_x_normalized) * delta_x;
+    Vector_1D y_distance_to_next_horizontal_cell_edge = (y_direction < 0)
+                                                            ? (world_y_normalized - grid_y) * delta_y
+                                                            : (grid_y + 1 - world_y_normalized) * delta_y;
+
+    Point_1D next_intersection_x;
+    Point_1D next_intersection_y;
 
     // Track if we've hit a wall and which side we hit
     int hit = 0;
@@ -2522,7 +2545,7 @@ void update_display(void)
   SDL_RenderClear(renderer);
   draw_map();
   draw_player();
-  // cast_rays_from_player();
+  cast_rays_from_player();
   SDL_RenderPresent(renderer);
 }
 

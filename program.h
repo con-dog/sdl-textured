@@ -19,6 +19,7 @@
 #define PLAYER_SPEED 15.0f
 #define PLAYER_ROTATION_SPEED 30.0f
 #define PLAYER_INTERACTION_DISTANCE 4.0f
+#define PLAYER_FOV 60
 // Math Utils
 #define CLOCKWISE 1
 #define ANTI_CLOCKWISE -1
@@ -50,13 +51,17 @@ typedef int8_t Rotation_Type;
 typedef double Degrees;
 typedef double Radians;
 
+typedef float Scalar;
+typedef float Plane_1D;
+typedef float Point_1D;
+typedef int Grid_Point_1D;
 typedef float Vector_1D;
+
 typedef struct Vector_2D
 {
   float x, y;
 } Vector_2D;
 
-typedef float Point_1D;
 typedef struct Point_2D
 {
   Point_1D x, y;
