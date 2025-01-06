@@ -6,5 +6,12 @@
     "complex": "c",
     "sdl_ttf.h": "c",
     "vector": "c"
-  }
+  },
+  "editor.semanticTokenColorCustomizations": {
+    "rules": {
+      "enumMember": {
+        "underline": true
+      }
+    }
+  },
 }

@@ -2027,7 +2027,7 @@ TTF_Font *font;
 const bool *keyboard_state;
 
 // clang-format off
-const static Letter map_2D_wall[GRID_SIZE] = {
+const static Wall_Type grid_walls[GRID_SIZE] = {
   A, A, A, A, A, A, A, A,
   A, z, B, z, z, z, z, A,
   A, z, B, z, z, z, z, A,
@@ -2230,10 +2230,9 @@ static void cast_rays_from_player(void)
     Point_1D next_wall_intersection_x;
     Point_1D next_wall_intersection_y;
 
-    bool hit = false;
-    int side;
-
-    while (!hit)
+    bool surface_hit = false;
+    Wall_Surface_Hit wall_surface_hit;
+    while (!surface_hit)
     {
       if (x_distance_to_next_vertical_cell_edge < y_distance_to_next_horizontal_cell_edge)
       {
@@ -2243,7 +2242,7 @@ static void cast_rays_from_player(void)
         next_wall_intersection_y = ray.start.y + (next_wall_intersection_x - ray.start.x) * y_direction / x_direction;
         x_distance_to_next_vertical_cell_edge += delta_x;
         grid_x += step_x;
-        side = 0;
+        wall_surface_hit = VERTICAL;
       }
       else
       {
@@ -2253,18 +2252,18 @@ static void cast_rays_from_player(void)
         next_wall_intersection_x = ray.start.x + (next_wall_intersection_y - ray.start.y) * x_direction / y_direction;
         y_distance_to_next_horizontal_cell_edge += delta_y;
         grid_y += step_y;
-        side = 1;
+        wall_surface_hit = HORIZONTAL;
       }
 
       ray.stop.x = next_wall_intersection_x;
       ray.stop.y = next_wall_intersection_y;
 
       unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
-      Letter grid_1D_array_value = map_2D_wall[grid_1D_array_index];
+      Wall_Type grid_1D_array_value = grid_walls[grid_1D_array_index];
 
       if (grid_1D_array_value != z)
       {
-        hit = 1;
+        surface_hit = 1;
         break;
       }
     }
@@ -2304,7 +2303,7 @@ static void cast_rays_from_player(void)
 //   ray.y1 = dda.wall.y;
 
 //   // Check if we've hit a wall
-//   if (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x] != z)
+//   if (grid_walls[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x] != z)
 //   {
 //     hit = 1;
 //   }
@@ -2355,7 +2354,7 @@ static void cast_rays_from_player(void)
 
 // int tex_x = (int)(wall_x * TEXTURE_W);
 
-// switch (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x])
+// switch (grid_walls[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x])
 // {
 // case A:
 // {
@@ -2394,8 +2393,6 @@ static void cast_rays_from_player(void)
 //   SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
 //   SDL_RenderFillRect(renderer, &wall_rect);
 // }
-}
-}
 
 void draw_player(void)
 {
@@ -2424,7 +2421,7 @@ static void draw_map(void)
         rect.w = CELL_SIZE * (1.0f - offset);
         rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2);
         rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
-        if (map_2D_wall[i * GRID_COLS + j])
+        if (grid_walls[i * GRID_COLS + j])
         {
           black_rects[black_count++] = rect;
         }
@@ -2504,10 +2501,10 @@ void move_player(float direction, float delta_time)
   unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
   unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
 
-  Letter top_left_map_cell_value = map_2D_wall[top_left_map_cell_index];
-  Letter top_right_map_cell_value = map_2D_wall[top_right_map_cell_index];
-  Letter bottom_left_map_cell_value = map_2D_wall[bottom_left_map_cell_index];
-  Letter bottom_right_map_cell_value = map_2D_wall[bottom_right_map_cell_index];
+  Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
+  Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
+  Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
+  Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
 
   if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
       bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)

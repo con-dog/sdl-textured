@@ -111,8 +111,14 @@ typedef struct DDA_Algo
   Vector_2D wall;
 } DDA_Algo;
 
+typedef enum Wall_Surface_Hit
+{
+  HORIZONTAL,
+  VERTICAL,
+} Wall_Surface_Hit;
+
 // clang-format off
-typedef enum Grid_Contents
+typedef enum Wall_Type
 {
   /* EMPTY */
   z,
@@ -140,7 +146,7 @@ typedef enum Grid_Contents
   X,
   Y,
   Z
-} Letter;
+} Wall_Type;
 // clang-format on
 
 #endif
