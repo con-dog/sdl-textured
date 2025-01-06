@@ -12,6 +12,7 @@
 #define GRID_COLS 8
 #define GRID_SIZE (GRID_ROWS * GRID_COLS)
 // Player
+#define EPSILON 0.0001f
 #define PLAYER_W 8.0f
 #define PLAYER_H 8.0f
 #define MOTION_DELTA_MULTIPLIER 5
@@ -20,7 +21,7 @@
 #define PLAYER_ROTATION_SPEED 30.0f
 #define PLAYER_INTERACTION_DISTANCE 4.0f
 #define PLAYER_FOV_DEG 60
-#define PLAYER_FOV_DEG_INC 0.5f
+#define PLAYER_FOV_DEG_INC 0.1f
 // Math Utils
 #define CLOCKWISE 1
 #define ANTI_CLOCKWISE -1

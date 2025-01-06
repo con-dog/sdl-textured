@@ -2235,7 +2235,7 @@ static void cast_rays_from_player(void)
     Wall_Surface_Hit surface_hit;
     while (!is_surface_hit)
     {
-      if (x_distance_to_next_vertical_cell_edge_normalized < y_distance_to_next_horizontal_cell_edge_normalized)
+      if (x_distance_to_next_vertical_cell_edge_normalized < y_distance_to_next_horizontal_cell_edge_normalized - EPSILON)
       {
         world_next_wall_intersection_x = (x_direction < 0)
                                              ? grid_x * CELL_SIZE
@@ -2278,6 +2278,10 @@ static void cast_rays_from_player(void)
     Scalar ray_length = sqrt(pow(ray.start.x - ray.stop.x, 2) + pow(ray.start.y - ray.stop.y, 2));
     Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV_DEG) * (WINDOW_W / 2) + WINDOW_W / 2;
     Scalar perpendicular_distance = ray_length * cos(theta);
+    if (perpendicular_distance < EPSILON)
+    {
+      perpendicular_distance = EPSILON;
+    }
     Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
     Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / PLAYER_FOV_DEG_INC);
 
@@ -2302,7 +2306,11 @@ static void cast_rays_from_player(void)
       wall_x = world_next_wall_intersection_y;
       Point_1D wall_x_normalized = wall_x / CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
-      Point_1D texture_x = wall_x_offset_normalized * TEXTURE_W;
+      Point_1D texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
+      if (texture_x >= TEXTURE_W)
+        texture_x = TEXTURE_W - 1;
+      if (texture_x < 0)
+        texture_x = 0;
 
       unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
       switch (grid_walls[grid_1D_array_index])
@@ -2325,32 +2333,8 @@ static void cast_rays_from_player(void)
       SDL_SetRenderDrawColor(renderer, 255, 20, 0, 255);
       SDL_RenderFillRect(renderer, &wall_rect);
     }
-
-    // Point_1D wall_x_normalized = wall_x / CELL_SIZE;
-    // Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
-    // Point_1D texture_x = wall_x_offset_normalized * TEXTURE_W;
-
-    // unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
-    // switch (grid_walls[grid_1D_array_index])
-    // {
-    // case A:
-    // {
-    //   SDL_FRect src_rect = {
-    //       .x = texture_x,
-    //       .y = 0,
-    //       .w = 1,
-    //       .h = TEXTURE_H};
-    //   SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
-    //   break;
-    // }
-    // default:
-    // {
-    SDL_SetRenderDrawColor(renderer, 255, 20, 0, 255);
-    SDL_RenderFillRect(renderer, &wall_rect);
-    // }
   }
 }
-// }
 
 void draw_player(void)
 {
