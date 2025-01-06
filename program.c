@@ -2281,11 +2281,6 @@ static void cast_rays_from_player(void)
     Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
     Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / PLAYER_FOV_DEG_INC);
 
-    if (vertical_strip_height > WINDOW_H)
-    {
-      vertical_strip_height = WINDOW_H;
-    }
-
     // Center line vertically
     Scalar vertical_offset = (WINDOW_H - vertical_strip_height) / 2;
 
