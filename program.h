@@ -12,7 +12,6 @@
 #define GRID_COLS 8
 #define GRID_SIZE (GRID_ROWS * GRID_COLS)
 // Player
-#define EPSILON 0.0001f
 #define PLAYER_W 8.0f
 #define PLAYER_H 8.0f
 #define MOTION_DELTA_MULTIPLIER 5
