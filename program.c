@@ -2198,7 +2198,7 @@ static void cast_rays_from_player(void)
 {
   Degrees start_angle = player.angle - PLAYER_FOV / 2;
   Degrees end_angle = player.angle + PLAYER_FOV / 2;
-  Uint8 r, g, b;
+  Uint8 r = 255, g = 0, b = 0, a = 255;
 
   for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 1.0f)
   {
@@ -2243,7 +2243,6 @@ static void cast_rays_from_player(void)
     Vector_1D step_y = (y_direction >= 0) ? 1 : -1;
     Vector_1D delta_x = fabs(1.0f / x_direction);
     Vector_1D delta_y = fabs(1.0f / y_direction);
-
     Grid_Point_1D grid_x = floorf(ray.start.x / CELL_SIZE);
     Grid_Point_1D grid_y = floorf(ray.start.y / CELL_SIZE);
     Point_1D world_x_normalized = ray.start.x / CELL_SIZE;
@@ -2256,129 +2255,171 @@ static void cast_rays_from_player(void)
                                                             ? (world_y_normalized - grid_y) * delta_y
                                                             : (grid_y + 1 - world_y_normalized) * delta_y;
 
-    Point_1D next_intersection_x;
-    Point_1D next_intersection_y;
+    Point_1D next_wall_intersection_x;
+    Point_1D next_wall_intersection_y;
 
-    // Track if we've hit a wall and which side we hit
-    int hit = 0;
+    bool hit = false;
     int side;
-    // DDA loop - step through grid cells until we hit a wall
+
     while (!hit)
     {
-      // Step in x or y direction depending on which side distance is smaller
-      if (dda.side_dist.x < dda.side_dist.y)
+      if (x_distance_to_next_vertical_cell_edge < y_distance_to_next_horizontal_cell_edge)
       {
-        // Calculate exact wall hit position for x-side
-        dda.wall.x = (ray.x_dir < 0) ? (dda.map_pos.x * CELL_SIZE) : ((dda.map_pos.x + 1) * CELL_SIZE);
-        dda.wall.y = ray.y0 + (dda.wall.x - ray.x0) * ray.y_dir / ray.x_dir;
-        dda.side_dist.x += dda.delta.x;
-        dda.map_pos.x += dda.step.x;
+        next_wall_intersection_x = (x_direction < 0)
+                                       ? grid_x * CELL_SIZE
+                                       : (grid_x + 1) * CELL_SIZE;
+        next_wall_intersection_y = ray.start.y + (next_wall_intersection_x - ray.start.x) * y_direction / x_direction;
+        x_distance_to_next_vertical_cell_edge += delta_x;
+        grid_x += step_x;
         side = 0;
       }
       else
       {
-        // Calculate exact wall hit position for y-side
-        dda.wall.y = (ray.y_dir < 0) ? (dda.map_pos.y * CELL_SIZE) : ((dda.map_pos.y + 1) * CELL_SIZE);
-        dda.wall.x = ray.x0 + (dda.wall.y - ray.y0) * ray.x_dir / ray.y_dir;
-        dda.side_dist.y += dda.delta.y;
-        dda.map_pos.y += dda.step.y;
+        next_wall_intersection_y = (y_direction < 0)
+                                       ? grid_y * CELL_SIZE
+                                       : (grid_y + 1) * CELL_SIZE;
+        next_wall_intersection_x = ray.start.x + (next_wall_intersection_y - ray.start.y) * x_direction / y_direction;
+        y_distance_to_next_horizontal_cell_edge += delta_y;
+        grid_y += step_y;
         side = 1;
       }
 
-      ray.x1 = dda.wall.x;
-      ray.y1 = dda.wall.y;
+      ray.stop.x = next_wall_intersection_x;
+      ray.stop.y = next_wall_intersection_y;
 
-      // Check if we've hit a wall
-      if (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x] != z)
+      unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+      Letter grid_1D_array_value = map_2D_wall[grid_1D_array_index];
+
+      if (grid_1D_array_value != z)
       {
         hit = 1;
+        break;
       }
     }
 
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    // Draw the ray from player to wall hit point
-    SDL_RenderLine(renderer, ray.x0, ray.y0, ray.x1, ray.y1);
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    SDL_RenderLine(renderer, ray.start.x, ray.start.y, ray.stop.x, ray.stop.y);
 
-    float hypotenuse = sqrt(pow(ray.x1 - ray.x0, 2) + pow(ray.y1 - ray.y0, 2));
-    // Calculate the x position for this ray's vertical line
-    // Map the angle from [-30, 30] to screen position [WINDOW_W/2, WINDOW_W]
-    float ray_screen_pos = ((current_angle - start_angle) / 60.0f) * (WINDOW_W / 2) + WINDOW_W / 2;
+    // // Track if we've hit a wall and which side we hit
+    // int hit = 0;
+    // int side;
+    // // DDA loop - step through grid cells until we hit a wall
+    // while (!hit)
+    // {
+    //   // Step in x or y direction depending on which side distance is smaller
+    //   if (dda.side_dist.x < dda.side_dist.y)
+    //   {
+    //     // Calculate exact wall hit position for x-side
+    //     dda.wall.x = (ray.x_dir < 0) ? (dda.map_pos.x * CELL_SIZE) : ((dda.map_pos.x + 1) * CELL_SIZE);
+    //     dda.wall.y = ray.y0 + (dda.wall.x - ray.x0) * ray.y_dir / ray.x_dir;
+    //     dda.side_dist.x += dda.delta.x;
+    //     dda.map_pos.x += dda.step.x;
+    //     side = 0;
+    //   }
+    //   else
+    //   {
+    //     // Calculate exact wall hit position for y-side
+    //     dda.wall.y = (ray.y_dir < 0) ? (dda.map_pos.y * CELL_SIZE) : ((dda.map_pos.y + 1) * CELL_SIZE);
+    //     dda.wall.x = ray.x0 + (dda.wall.y - ray.y0) * ray.x_dir / ray.y_dir;
+    //     dda.side_dist.y += dda.delta.y;
+    //     dda.map_pos.y += dda.step.y;
+    //     side = 1;
+    //   }
 
-    // Calculate perpendicular distance to avoid fisheye effect
-    float perp_distance = hypotenuse * cos((current_angle - player.angle) * (M_PI / 180.0));
+    //   ray.x1 = dda.wall.x;
+    //   ray.y1 = dda.wall.y;
 
-    // Calculate line height using perpendicular distance
-    float line_h = (CELL_SIZE * WINDOW_H) / perp_distance;
-    if (line_h > WINDOW_H)
-      line_h = WINDOW_H;
+    //   // Check if we've hit a wall
+    //   if (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x] != z)
+    //   {
+    //     hit = 1;
+    //   }
+    // }
 
-    // Calculate where to start drawing the vertical line so it's centered
-    float line_offset = (WINDOW_H - line_h) / 2;
+    // SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    // // Draw the ray from player to wall hit point
+    // SDL_RenderLine(renderer, ray.x0, ray.y0, ray.x1, ray.y1);
 
-    // Calculate the width of each vertical strip
-    float strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / 0.25f);
+    // float hypotenuse = sqrt(pow(ray.x1 - ray.x0, 2) + pow(ray.y1 - ray.y0, 2));
+    // // Calculate the x position for this ray's vertical line
+    // // Map the angle from [-30, 30] to screen position [WINDOW_W/2, WINDOW_W]
+    // float ray_screen_pos = ((current_angle - start_angle) / 60.0f) * (WINDOW_W / 2) + WINDOW_W / 2;
 
-    SDL_FRect wall_rect = {
-        .x = (int)ray_screen_pos,
-        .y = (int)line_offset,
-        .w = (int)ceil(strip_width),
-        .h = (int)line_h,
-    };
+    // // Calculate perpendicular distance to avoid fisheye effect
+    // float perp_distance = hypotenuse * cos((current_angle - player.angle) * (M_PI / 180.0));
 
-    float wall_x;
-    if (side == 0)
-    {
-      wall_x = dda.wall.y; // For vertical walls, use the calculated y position
-    }
-    else
-    {
-      wall_x = dda.wall.x; // For horizontal walls, use the calculated x position
-    }
+    // // Calculate line height using perpendicular distance
+    // float line_h = (CELL_SIZE * WINDOW_H) / perp_distance;
+    // if (line_h > WINDOW_H)
+    //   line_h = WINDOW_H;
 
-    wall_x = wall_x / CELL_SIZE;
-    wall_x -= floor(wall_x);
+    // // Calculate where to start drawing the vertical line so it's centered
+    // float line_offset = (WINDOW_H - line_h) / 2;
 
-    int tex_x = (int)(wall_x * TEXTURE_W);
+    // // Calculate the width of each vertical strip
+    // float strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / 0.25f);
 
-    switch (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x])
-    {
-    case A:
-    {
-      SDL_FRect src_rect = {
-          .x = tex_x,
-          .y = 0,
-          .w = 1,
-          .h = TEXTURE_H};
+    // SDL_FRect wall_rect = {
+    //     .x = (int)ray_screen_pos,
+    //     .y = (int)line_offset,
+    //     .w = (int)ceil(strip_width),
+    //     .h = (int)line_h,
+    // };
 
-      SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
-      break;
-    }
-    case B:
-    {
-      SDL_FRect src_rect = {
-          .x = tex_x,
-          .y = 0,
-          .w = 1,
-          .h = TEXTURE_H};
+    // float wall_x;
+    // if (side == 0)
+    // {
+    //   wall_x = dda.wall.y; // For vertical walls, use the calculated y position
+    // }
+    // else
+    // {
+    //   wall_x = dda.wall.x; // For horizontal walls, use the calculated x position
+    // }
 
-      SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
-      break;
-    }
-    case C:
-    {
-      SDL_FRect src_rect = {
-          .x = tex_x,
-          .y = 0,
-          .w = 1,
-          .h = TEXTURE_H};
+    // wall_x = wall_x / CELL_SIZE;
+    // wall_x -= floor(wall_x);
 
-      SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
-      break;
-    }
-    default:
-      SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
-      SDL_RenderFillRect(renderer, &wall_rect);
-    }
+    // int tex_x = (int)(wall_x * TEXTURE_W);
+
+    // switch (map_2D_wall[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x])
+    // {
+    // case A:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // case B:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // case C:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // default:
+    //   SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
+    //   SDL_RenderFillRect(renderer, &wall_rect);
+    // }
   }
 }
 
