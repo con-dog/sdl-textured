@@ -111,14 +111,13 @@ typedef struct DDA_Algo
   Vector_2D wall;
 } DDA_Algo;
 
-//
-typedef enum Letter
+// clang-format off
+typedef enum Grid_Contents
 {
-  z, // 0
-  A,
-  B,
-  C,
-  D,
+  /* EMPTY */
+  z,
+  /* FULL */
+  A, B, C, D,    // * BRICK
   E,
   F,
   G,
@@ -142,5 +141,6 @@ typedef enum Letter
   Y,
   Z
 } Letter;
+// clang-format on
 
 #endif
