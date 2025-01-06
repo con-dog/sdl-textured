@@ -2196,11 +2196,11 @@ static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
 
 static void cast_rays_from_player(void)
 {
-  Degrees start_angle = player.angle - PLAYER_FOV / 2;
-  Degrees end_angle = player.angle + PLAYER_FOV / 2;
+  Degrees start_angle = player.angle - PLAYER_FOV_DEG / 2;
+  Degrees end_angle = player.angle + PLAYER_FOV_DEG / 2;
   Uint8 r = 255, g = 0, b = 0, a = 255;
 
-  for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 1.0f)
+  for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += PLAYER_FOV_DEG_INC)
   {
     Radians radians = convert_deg_to_rads(current_angle);
     Radians theta = convert_deg_to_rads(current_angle - player.angle);
@@ -2276,12 +2276,10 @@ static void cast_rays_from_player(void)
      * 2.5D Rendering
      */
     Scalar ray_length = sqrt(pow(ray.start.x - ray.stop.x, 2) + pow(ray.start.y - ray.stop.y, 2));
-
-    // Rename , retype (is it an x position?)
-    Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV) * (WINDOW_W / 2) + WINDOW_W / 2;
+    Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV_DEG) * (WINDOW_W / 2) + WINDOW_W / 2;
     Scalar perpendicular_distance = ray_length * cos(theta);
     Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
-    Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / 1.0f);
+    Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / PLAYER_FOV_DEG_INC);
 
     if (vertical_strip_height > WINDOW_H)
     {
@@ -2308,7 +2306,7 @@ static void cast_rays_from_player(void)
       wall_x = next_wall_intersection_x;
     }
 
-    SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 20, 0, 255);
     SDL_RenderFillRect(renderer, &wall_rect);
 
     // float hypotenuse = sqrt(pow(ray.x1 - ray.x0, 2) + pow(ray.y1 - ray.y0, 2));
