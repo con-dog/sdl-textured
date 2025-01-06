@@ -2203,6 +2203,7 @@ static void cast_rays_from_player(void)
   for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 1.0f)
   {
     Radians radians = convert_deg_to_rads(current_angle);
+    Radians theta = convert_deg_to_rads(current_angle - player.angle);
     Line_2D ray;
 
     ray.start.x = player.rect.x + (PLAYER_W / 2);
@@ -2230,9 +2231,9 @@ static void cast_rays_from_player(void)
     Point_1D next_wall_intersection_x;
     Point_1D next_wall_intersection_y;
 
-    bool surface_hit = false;
-    Wall_Surface_Hit wall_surface_hit;
-    while (!surface_hit)
+    bool is_surface_hit = false;
+    Wall_Surface_Hit surface_hit;
+    while (!is_surface_hit)
     {
       if (x_distance_to_next_vertical_cell_edge < y_distance_to_next_horizontal_cell_edge)
       {
@@ -2242,7 +2243,7 @@ static void cast_rays_from_player(void)
         next_wall_intersection_y = ray.start.y + (next_wall_intersection_x - ray.start.x) * y_direction / x_direction;
         x_distance_to_next_vertical_cell_edge += delta_x;
         grid_x += step_x;
-        wall_surface_hit = VERTICAL;
+        surface_hit = VERTICAL;
       }
       else
       {
@@ -2252,7 +2253,7 @@ static void cast_rays_from_player(void)
         next_wall_intersection_x = ray.start.x + (next_wall_intersection_y - ray.start.y) * x_direction / y_direction;
         y_distance_to_next_horizontal_cell_edge += delta_y;
         grid_y += step_y;
-        wall_surface_hit = HORIZONTAL;
+        surface_hit = HORIZONTAL;
       }
 
       ray.stop.x = next_wall_intersection_x;
@@ -2263,13 +2264,133 @@ static void cast_rays_from_player(void)
 
       if (grid_1D_array_value != z)
       {
-        surface_hit = 1;
+        is_surface_hit = 1;
         break;
       }
     }
 
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
     SDL_RenderLine(renderer, ray.start.x, ray.start.y, ray.stop.x, ray.stop.y);
+
+    /*
+     * 2.5D Rendering
+     */
+    Scalar ray_length = sqrt(pow(ray.start.x - ray.stop.x, 2) + pow(ray.start.y - ray.stop.y, 2));
+
+    // Rename , retype (is it an x position?)
+    Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV) * (WINDOW_W / 2) + WINDOW_W / 2;
+    Scalar perpendicular_distance = ray_length * cos(theta);
+    Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
+    Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / 1.0f);
+
+    if (vertical_strip_height > WINDOW_H)
+    {
+      vertical_strip_height = WINDOW_H;
+    }
+
+    // Center line vertically
+    Scalar vertical_offset = (WINDOW_H - vertical_strip_height) / 2;
+
+    SDL_FRect wall_rect = {
+        .x = ray_screen_position_x,
+        .y = vertical_offset,
+        .w = vertical_strip_width,
+        .h = vertical_strip_height,
+    };
+
+    Point_1D wall_x;
+    if (surface_hit == VERTICAL)
+    {
+      wall_x = next_wall_intersection_y;
+    }
+    else
+    {
+      wall_x = next_wall_intersection_x;
+    }
+
+    SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
+    SDL_RenderFillRect(renderer, &wall_rect);
+
+    // float hypotenuse = sqrt(pow(ray.x1 - ray.x0, 2) + pow(ray.y1 - ray.y0, 2));
+    // // Calculate the x position for this ray's vertical line
+    // // Map the angle from [-30, 30] to screen position [WINDOW_W/2, WINDOW_W]
+    // float ray_screen_pos = ((current_angle - start_angle) / 60.0f) * (WINDOW_W / 2) + WINDOW_W / 2;
+
+    // // Calculate perpendicular distance to avoid fisheye effect
+    // float perp_distance = hypotenuse * cos((current_angle - player.angle) * (M_PI / 180.0));
+
+    // // Calculate line height using perpendicular distance
+    // float line_h = (CELL_SIZE * WINDOW_H) / perp_distance;
+    // if (line_h > WINDOW_H)
+    //   line_h = WINDOW_H;
+
+    // // Calculate where to start drawing the vertical line so it's centered
+    // float line_offset = (WINDOW_H - line_h) / 2;
+
+    // // Calculate the width of each vertical strip
+    // float strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / 0.25f);
+
+    // SDL_FRect wall_rect = {
+    //     .x = (int)ray_screen_pos,
+    //     .y = (int)line_offset,
+    //     .w = (int)ceil(strip_width),
+    //     .h = (int)line_h,
+    // };
+
+    // float wall_x;
+    // if (side == 0)
+    // {
+    //   wall_x = dda.wall.y; // For vertical walls, use the calculated y position
+    // }
+    // else
+    // {
+    //   wall_x = dda.wall.x; // For horizontal walls, use the calculated x position
+    // }
+
+    // wall_x = wall_x / CELL_SIZE;
+    // wall_x -= floor(wall_x);
+
+    // int tex_x = (int)(wall_x * TEXTURE_W);
+
+    // switch (grid_walls[GRID_ROWS * (int)dda.map_pos.y + (int)dda.map_pos.x])
+    // {
+    // case A:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // case B:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // case C:
+    // {
+    //   SDL_FRect src_rect = {
+    //       .x = tex_x,
+    //       .y = 0,
+    //       .w = 1,
+    //       .h = TEXTURE_H};
+
+    //   SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
+    //   break;
+    // }
+    // default:
+    //   SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
+    //   SDL_RenderFillRect(renderer, &wall_rect);
+    // }
   }
 }
 
