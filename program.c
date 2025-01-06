@@ -2479,26 +2479,6 @@ void move_player(float direction, float delta_time)
     player.rect.x = new_pos.x;
     player.rect.y = new_pos.y;
   }
-
-  // // Calculate the map grid coordinates for checking collisions
-  // int map_x = (int)(new_x / CELL_SIZE);
-  // int map_y = (int)(new_y / CELL_SIZE);
-
-  // // Add offset for the player's size when checking corners
-  // float offset = PLAYER_W * 0.5f; // Half the player's size
-
-  // // Check all four corners of the player's hitbox
-  // int top_left = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  // int top_right = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  // int bottom_left = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  // int bottom_right = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-
-  // // Only move if none of the corners would hit a wall
-  // if (top_left == z && top_right == z && bottom_left == z && bottom_right == z)
-  // {
-  //   player.rect.x = new_x;
-  //   player.rect.y = new_y;
-  // }
 }
 
 uint8_t get_kb_arrow_input_state(void)
