@@ -2039,9 +2039,9 @@ const static Letter map_2D_wall[GRID_SIZE] = {
 };
 // clang-format on
 
-static double convert_deg_to_rads(double angle)
+static Radians convert_deg_to_rads(Degrees degrees)
 {
-  return angle * (M_PI / 180.0f);
+  return degrees * (M_PI / 180.0f);
 }
 
 static int sdl_init()
@@ -2128,16 +2128,16 @@ static void player_init(void)
   player.rect.h = PLAYER_H;
   player.angle = 0.0f;
 
-  double angle_radians = convert_deg_to_rads(player.angle);
-  player.delta.x = cos(angle_radians) * MOTION_DELTA_MULTIPLIER;
-  player.delta.y = sin(angle_radians) * MOTION_DELTA_MULTIPLIER;
+  Radians radians = convert_deg_to_rads(player.angle);
+  player.delta.x = cos(radians) * MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
 }
 
-static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg, float length)
+static void create_2D_line_from_start_point(Line_2D *out_line, Degrees degrees, float length)
 {
-  double angle_rads = convert_deg_to_rads(angle_deg);
-  out_line->stop.x = out_line->start.x + length * cos(angle_rads);
-  out_line->stop.y = out_line->start.y + length * sin(angle_rads);
+  Radians radians = convert_deg_to_rads(degrees);
+  out_line->stop.x = out_line->start.x + length * cos(radians);
+  out_line->stop.y = out_line->start.y + length * sin(radians);
 }
 
 static void draw_player_direction(void)
@@ -2194,24 +2194,23 @@ static void print_text(float angle_radians, Ray_Pos ray, DDA_Algo dda)
   }
 }
 
-// Draw a ray from player to wall using DDA (Digital Differential Analysis) algorithm
-static void draw_dda_ray(void)
+static void cast_rays_from_player(void)
 {
   // Calculate start and end angles for 60° FOV centered on player angle
-  float start_angle = player.angle - 30; // 30° left of center
-  float end_angle = player.angle + 30;   // 30° right of center
+  Degrees start_angle = player.angle - 30; // 30° left of center
+  Degrees end_angle = player.angle + 30;   // 30° right of center
   Uint8 r, g, b;
-  for (float current_angle = start_angle; current_angle <= end_angle; current_angle += 0.25f)
+  for (Degrees current_angle = start_angle; current_angle <= end_angle; current_angle += 0.25f)
   {
-    float angle_radians = current_angle * (M_PI / 180.0);
+    Radians radians = convert_deg_to_rads(current_angle);
 
     Ray_Pos ray = {
         // Center ray start position on player
         .x0 = player.rect.x + (PLAYER_W / 2),
         .y0 = player.rect.y + (PLAYER_H / 2),
         // Calculate ray direction vector from angle
-        .x_dir = cos(angle_radians),
-        .y_dir = sin(angle_radians),
+        .x_dir = cos(radians),
+        .y_dir = sin(radians),
     };
 
     DDA_Algo dda = {
@@ -2235,7 +2234,7 @@ static void draw_dda_ray(void)
         .wall.y = ray.y0,
     };
 
-    print_text(angle_radians, ray, dda);
+    print_text(radians, ray, dda);
 
     // Track if we've hit a wall and which side we hit
     int hit = 0;
@@ -2414,9 +2413,9 @@ void rotate_player(Rotation_Type rotation, float delta_time)
                  : (player.angle > 360)
                      ? 0
                      : player.angle;
-  double angle_rads = convert_deg_to_rads(player.angle);
-  player.delta.x = cos(angle_rads) * MOTION_DELTA_MULTIPLIER;
-  player.delta.y = sin(angle_rads) * MOTION_DELTA_MULTIPLIER;
+  Radians radians = convert_deg_to_rads(player.angle);
+  player.delta.x = cos(radians) * MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
 }
 
 Rect_2D convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
@@ -2523,7 +2522,7 @@ void update_display(void)
   SDL_RenderClear(renderer);
   draw_map();
   draw_player();
-  // draw_dda_ray();
+  // cast_rays_from_player();
   SDL_RenderPresent(renderer);
 }
 

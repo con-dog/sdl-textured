@@ -47,6 +47,8 @@
 #include <SDL3/SDL_rect.h>
 
 typedef int8_t Rotation_Type;
+typedef double Degrees;
+typedef double Radians;
 
 typedef float Vector_1D;
 typedef struct Vector_2D
@@ -78,7 +80,7 @@ typedef struct Player
 {
   SDL_FRect rect;
   Vector_2D delta;
-  double angle; // degrees
+  Degrees angle; // degrees
 } Player;
 
 typedef struct Player_Pos
