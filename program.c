@@ -2080,6 +2080,7 @@ static int font_init(void)
 
 static int brick_texture_init(void)
 {
+
   brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
   if (brick_texture == NULL)
   {
@@ -2087,6 +2088,7 @@ static int brick_texture_init(void)
     return 3;
   }
 
+  SDL_SetTextureScaleMode(brick_texture, SDL_SCALEMODE_NEAREST);
   SDL_UpdateTexture(brick_texture, NULL, brick_pixel_image.pixel_data, TEXTURE_W * 4);
 
   return 0;
@@ -2307,7 +2309,7 @@ static void cast_rays_from_player(void)
         SDL_FRect src_rect = {
             .x = texture_x,
             .y = 0,
-            .w = 1,
+            .w = 0,
             .h = TEXTURE_H};
         SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
         break;
