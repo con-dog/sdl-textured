@@ -2140,7 +2140,6 @@ static void create_2D_line_from_start_point(Line_2D *out_line, double angle_deg,
   out_line->stop.y = out_line->start.y + length * sin(angle_rads);
 }
 
-// Draw a simple direction indicator ray from player's center
 static void draw_player_direction(void)
 {
   float length = 30.0f;
