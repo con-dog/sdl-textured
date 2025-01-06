@@ -2102,7 +2102,7 @@ static int leaves_texture_init(void)
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
     return 3;
   }
-
+  SDL_SetTextureScaleMode(leaves_texture, SDL_SCALEMODE_NEAREST);
   SDL_UpdateTexture(leaves_texture, NULL, leaves_pixel_image.pixel_data, TEXTURE_W * 4);
 
   return 0;
@@ -2117,6 +2117,7 @@ static int flowers_texture_init(void)
     return 3;
   }
 
+  SDL_SetTextureScaleMode(flowers_texture, SDL_SCALEMODE_NEAREST);
   SDL_UpdateTexture(flowers_texture, NULL, flower_pixel_image.pixel_data, TEXTURE_W * 4);
 
   return 0;
@@ -2294,33 +2295,52 @@ static void cast_rays_from_player(void)
     };
 
     Point_1D wall_x;
+    Point_1D texture_x;
     if (surface_hit == VERTICAL)
     {
       wall_x = world_next_wall_intersection_y;
       Point_1D wall_x_normalized = wall_x / CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
-      Point_1D texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
-
-      unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
-      switch (grid_walls[grid_1D_array_index])
-      {
-      case A:
-      {
-        SDL_FRect src_rect = {
-            .x = texture_x,
-            .y = 0,
-            .w = 0,
-            .h = TEXTURE_H};
-        SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
-        break;
-      }
-      }
+      texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
     }
     else
     {
       wall_x = world_next_wall_intersection_x;
+      Point_1D wall_x_normalized = wall_x / CELL_SIZE;
+      Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
+      texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
+
+      unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+    }
+
+    unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+    switch (grid_walls[grid_1D_array_index])
+    {
+    case A:
+    {
+      SDL_FRect src_rect = {
+          .x = texture_x,
+          .y = 0,
+          .w = 1,
+          .h = TEXTURE_H};
+      SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
+      break;
+    }
+    case B:
+    {
+      SDL_FRect src_rect = {
+          .x = texture_x,
+          .y = 0,
+          .w = 1,
+          .h = TEXTURE_H};
+      SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
+      break;
+    }
+    default:
+    {
       SDL_SetRenderDrawColor(renderer, 255, 20, 0, 255);
       SDL_RenderFillRect(renderer, &wall_rect);
+    }
     }
   }
 }
