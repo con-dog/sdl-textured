@@ -2420,24 +2420,64 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(angle_rads) * MOTION_DELTA_MULTIPLIER;
 }
 
-int convert_world_2D_point_to_hit_box(Point_2D *world_point, float offset)
+Rect_2D convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
 {
-  Rect_2D world_hit_box = {
+  Rect_2D player_hit_box_world = {
+      // Top-left
       .tl.x = world_point->x - offset,
-      // TODO
+      .tl.y = world_point->y - offset,
+      // Top-right
+      .tr.x = world_point->x + PLAYER_W + offset,
+      .tr.y = world_point->y - offset,
+      // Bottom-left
+      .bl.x = world_point->x - offset,
+      .bl.y = world_point->y + PLAYER_H + offset,
+      // Bottom-right
+      .br.x = world_point->x + PLAYER_W + offset,
+      .br.y = world_point->y + PLAYER_H + offset};
 
+  Rect_2D player_hit_box_normalized = {
+      // Top-left
+      .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
+      .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
+      // Top-right
+      .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
+      .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
+      // Bottom-left
+      .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
+      .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
+      // Bottom-right
+      .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
+      .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
   };
 
-  Rect_2D normalized_hit_box...;
-
-  array_index = ...;
+  return player_hit_box_normalized;
 }
 
 void move_player(float direction, float delta_time)
 {
   Point_2D new_pos = {
-    .x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time),
-    .y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time),
+      .x = player.rect.x + (direction * player.delta.x * PLAYER_SPEED * delta_time),
+      .y = player.rect.y + (direction * player.delta.y * PLAYER_SPEED * delta_time),
+  };
+
+  Rect_2D new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
+
+  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
+  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
+  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
+  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
+
+  Letter top_left_map_cell_value = map_2D_wall[top_left_map_cell_index];
+  Letter top_right_map_cell_value = map_2D_wall[top_right_map_cell_index];
+  Letter bottom_left_map_cell_value = map_2D_wall[bottom_left_map_cell_index];
+  Letter bottom_right_map_cell_value = map_2D_wall[bottom_right_map_cell_index];
+
+  if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
+      bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
+  {
+    player.rect.x = new_pos.x;
+    player.rect.y = new_pos.y;
   }
 
   // // Calculate the map grid coordinates for checking collisions
@@ -2447,18 +2487,18 @@ void move_player(float direction, float delta_time)
   // // Add offset for the player's size when checking corners
   // float offset = PLAYER_W * 0.5f; // Half the player's size
 
-  // Check all four corners of the player's hitbox
-  int top_left = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int top_right = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int bottom_left = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
-  int bottom_right = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  // // Check all four corners of the player's hitbox
+  // int top_left = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  // int top_right = map_2D_wall[((int)((new_y - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  // int bottom_left = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x - PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
+  // int bottom_right = map_2D_wall[((int)((new_y + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE) * GRID_COLS) + (int)((new_x + PLAYER_INTERACTION_DISTANCE) / CELL_SIZE)];
 
-  // Only move if none of the corners would hit a wall
-  if (top_left == z && top_right == z && bottom_left == z && bottom_right == z)
-  {
-    player.rect.x = new_x;
-    player.rect.y = new_y;
-  }
+  // // Only move if none of the corners would hit a wall
+  // if (top_left == z && top_right == z && bottom_left == z && bottom_right == z)
+  // {
+  //   player.rect.x = new_x;
+  //   player.rect.y = new_y;
+  // }
 }
 
 uint8_t get_kb_arrow_input_state(void)
