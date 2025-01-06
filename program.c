@@ -2039,6 +2039,8 @@ const static Wall_Type grid_walls[GRID_SIZE] = {
 };
 // clang-format on
 
+JaggedGrid jagged_grid_walls;
+
 static Radians convert_deg_to_rads(Degrees degrees)
 {
   return degrees * (M_PI / 180.0f);
@@ -2368,7 +2370,86 @@ void draw_player(void)
   draw_player_direction();
 }
 
-static void draw_map(void)
+static void init_jagged_grid(void)
+{
+
+  jagged_grid_walls.num_rows = JAGGED_GRID_ROWS;
+  jagged_grid_walls.rows = malloc(JAGGED_GRID_ROWS * sizeof(JaggedRow));
+
+  jagged_grid_walls.rows[0] = (JaggedRow){
+      .start_index = 1,
+      .length = 4,
+      .elements = malloc(4 * sizeof(Wall_Type)),
+  };
+
+  jagged_grid_walls.rows[0].elements[1] = A;
+  jagged_grid_walls.rows[0].elements[2] = z;
+  jagged_grid_walls.rows[0].elements[3] = A;
+  jagged_grid_walls.rows[0].elements[4] = z;
+}
+
+Wall_Type get_jagged_row_element(unsigned int row, unsigned int col)
+{
+  JaggedRow *current_row = &(&jagged_grid_walls)->rows[row];
+
+  if (col < current_row->start_index ||
+      col >= current_row->start_index + current_row->length)
+  {
+    printf("Invalid Wall\n");
+  }
+
+  int adjusted_col = col - current_row->start_index;
+  return current_row->elements[adjusted_col];
+}
+
+static void draw_jagged_grid(void)
+{
+  static bool initialized = false;
+  static SDL_FRect black_rects[4];
+  static SDL_FRect white_rects[4];
+  static int black_count = 0;
+  static int white_count = 0;
+  static float offset = 0.1f;
+
+  if (!initialized)
+  {
+    for (int i = 0; i < JAGGED_GRID_ROWS; i++)
+    {
+      JaggedRow *current_row = &(&jagged_grid_walls)->rows[i];
+      int start_index = current_row->start_index;
+      int end_index = start_index + current_row->length;
+      printf("start index: %d\nend index: %d\n", start_index, end_index);
+      for (int j = start_index; j < end_index; j++)
+      {
+        SDL_FRect rect;
+        rect.h = CELL_SIZE * (1.0f - offset);
+        rect.w = CELL_SIZE * (1.0f - offset);
+        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2);
+        rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
+        if (*(&(&jagged_grid_walls)->rows[i].elements[j]))
+        {
+          printf("black\n");
+          printf("%d", *(&(&jagged_grid_walls)->rows[i].elements[j]));
+          black_rects[black_count++] = rect;
+        }
+        else
+        {
+          printf("white\n");
+          white_rects[white_count++] = rect;
+        }
+      }
+    }
+    initialized = true;
+  }
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderFillRects(renderer, white_rects, white_count);
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderFillRects(renderer, black_rects, black_count);
+}
+
+static void
+draw_map(void)
 {
   static bool initialized = false;
   static SDL_FRect black_rects[GRID_SIZE];
@@ -2526,9 +2607,10 @@ void update_display(void)
 {
   SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255); // White background
   SDL_RenderClear(renderer);
-  draw_map();
-  draw_player();
-  cast_rays_from_player();
+  draw_jagged_grid();
+  // draw_map();
+  // draw_player();
+  // cast_rays_from_player();
   SDL_RenderPresent(renderer);
 }
 
@@ -2552,7 +2634,7 @@ void run_game_loop(void)
       }
     }
 
-    handle_player_movement(delta_time);
+    // handle_player_movement(delta_time);
     update_display();
   }
 }
@@ -2560,13 +2642,13 @@ void run_game_loop(void)
 int main(int argc, char *argv[])
 {
   sdl_init();
-  brick_texture_init();
-  leaves_texture_init();
-  flowers_texture_init();
-  font_init();
-  player_init();
+  // brick_texture_init();
+  // leaves_texture_init();
+  // flowers_texture_init();
+  // font_init();
+  // player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);
-
+  init_jagged_grid();
   run_game_loop();
 
   SDL_DestroyRenderer(renderer);

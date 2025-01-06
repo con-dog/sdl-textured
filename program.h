@@ -11,6 +11,8 @@
 #define GRID_ROWS 8
 #define GRID_COLS 8
 #define GRID_SIZE (GRID_ROWS * GRID_COLS)
+
+#define JAGGED_GRID_ROWS 1
 // Player
 #define PLAYER_W 8.0f
 #define PLAYER_H 8.0f
@@ -40,6 +42,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -150,5 +153,18 @@ typedef enum Wall_Type
   Z
 } Wall_Type;
 // clang-format on
+
+typedef struct
+{
+  unsigned int start_index; // Where this row starts
+  unsigned int length;      // How many elements in this row
+  Wall_Type *elements;      // Pointer to the actual elements
+} JaggedRow;
+
+typedef struct
+{
+  int num_rows;    // Total number of rows
+  JaggedRow *rows; // Array of row descriptors
+} JaggedGrid;
 
 #endif
