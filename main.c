@@ -2015,6 +2015,9 @@ SDL_Texture *leaves_texture;
 SDL_Texture *flowers_texture;
 
 //
+
+Jagged_Grid *wall_grid;
+
 Player player;
 //
 
@@ -2025,19 +2028,10 @@ TTF_Font *font;
 const bool *keyboard_state;
 
 // clang-format off
-const static Wall_Type grid_walls[64] = {
-  A, A, A, A, A, A, A, A,
-  A, z, B, z, z, z, z, A,
-  A, z, B, z, z, z, z, A,
-  A, z, B, z, C, C, z, A,
-  A, z, B, z, C, C, z, A,
-  A, z, z, z, z, z, z, A,
-  A, z, z, z, z, z, z, A,
-  A, A, A, A, C, C, C, C,
+const static Wall_Type grid_walls[10] = {
+  'A'
 };
 // clang-format on
-
-Jagged_Grid jagged_grid_walls;
 
 static int sdl_init()
 {
@@ -2222,7 +2216,7 @@ static void cast_rays_from_player(void)
       unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
       Wall_Type grid_1D_array_value = grid_walls[grid_1D_array_index];
 
-      if (grid_1D_array_value != z)
+      if (grid_1D_array_value != 'z')
       {
         is_surface_hit = 1;
         break;
@@ -2279,7 +2273,7 @@ static void cast_rays_from_player(void)
     unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
     switch (grid_walls[grid_1D_array_index])
     {
-    case A:
+    case 'A':
     {
       SDL_FRect src_rect = {
           .x = texture_x,
@@ -2289,7 +2283,7 @@ static void cast_rays_from_player(void)
       SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
       break;
     }
-    case B:
+    case 'B':
     {
       SDL_FRect src_rect = {
           .x = texture_x,
@@ -2299,7 +2293,7 @@ static void cast_rays_from_player(void)
       SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
       break;
     }
-    case C:
+    case 'C':
     {
       SDL_FRect src_rect = {
           .x = texture_x,
@@ -2325,124 +2319,82 @@ void draw_player(void)
   draw_player_direction();
 }
 
-static void init_jagged_grid(void)
-{
-
-  jagged_grid_walls.num_rows = 2;
-  jagged_grid_walls.rows = malloc(2 * sizeof(Jagged_Row));
-
-  jagged_grid_walls.rows[0] = (Jagged_Row){
-      .x_offset = 1,
-      .length = 4,
-      .elements = malloc(4 * sizeof(Wall_Type)),
-  };
-
-  jagged_grid_walls.rows[1] = (Jagged_Row){
-      .x_offset = 3,
-      .length = 2,
-      .elements = malloc(2 * sizeof(Wall_Type)),
-  };
-
-  jagged_grid_walls.rows[0].elements[0] = A;
-  jagged_grid_walls.rows[0].elements[1] = z;
-  jagged_grid_walls.rows[0].elements[2] = A;
-  jagged_grid_walls.rows[0].elements[3] = z;
-
-  jagged_grid_walls.rows[1].elements[0] = A;
-  jagged_grid_walls.rows[1].elements[1] = z;
-}
-
-// static void free_jagged_grid(void)
-// {
-//   // jagged_grid_walls.rows
-//   for (int i = 0; i < jagged_grid_walls.num_rows; i++)
-//   {
-//     free(jagged_grid_walls.rows[i].elements);
-//   }
-//   free(jagged_grid_walls.rows);
-// }
-
 static void draw_jagged_grid(void)
 {
-  static bool initialized = false;
-  static SDL_FRect black_rects[64];
-  static SDL_FRect white_rects[64];
-  static int black_count = 0;
-  static int white_count = 0;
-  static float offset = 0.1f;
-
-  if (!initialized)
+  for (int i = 0; i < wall_grid->num_rows; i++)
   {
-    for (int i = 0; i < 2; i++)
+
+    Jagged_Row *current_row = &wall_grid->rows[i];
+    bool initialized = false;
+    SDL_FRect black_rects[current_row->length];
+    SDL_FRect white_rects[current_row->length];
+    int black_count = 0;
+    int white_count = 0;
+    float offset = 0.1f;
+    for (int j = 0; j < current_row->length; j++)
     {
-      Jagged_Row *current_row = &(&jagged_grid_walls)->rows[i];
-      int end_index = 0 + current_row->length;
-      for (int j = 0; j < end_index; j++)
+      SDL_FRect rect;
+      rect.h = GRID_CELL_SIZE * (1.0f - offset);
+      rect.w = GRID_CELL_SIZE * (1.0f - offset);
+      rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2) + (GRID_CELL_SIZE * current_row->x_offset);
+      rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
+      if (wall_grid->rows[i].elements[j] != 'z')
       {
-        SDL_FRect rect;
-        rect.h = GRID_CELL_SIZE * (1.0f - offset);
-        rect.w = GRID_CELL_SIZE * (1.0f - offset);
-        rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2) + (j * GRID_CELL_SIZE + 64);
-        rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
-        if (*(&(&jagged_grid_walls)->rows[i].elements[j]))
-        {
-          black_rects[black_count++] = rect;
-        }
-        else
-        {
-          white_rects[white_count++] = rect;
-        }
+        black_rects[black_count++] = rect;
+      }
+      else
+      {
+        white_rects[white_count++] = rect;
       }
     }
-    initialized = true;
-  }
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderFillRects(renderer, white_rects, white_count);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRects(renderer, white_rects, white_count);
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderFillRects(renderer, black_rects, black_count);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRects(renderer, black_rects, black_count);
+  }
 }
 
-static void
-draw_map(void)
-{
-  static bool initialized = false;
-  static SDL_FRect black_rects[64];
-  static SDL_FRect white_rects[64];
-  static int black_count = 0;
-  static int white_count = 0;
-  static float offset = 0.1f;
+// static void
+// draw_map(void)
+// {
+//   static bool initialized = false;
+//   static SDL_FRect black_rects[64];
+//   static SDL_FRect white_rects[64];
+//   static int black_count = 0;
+//   static int white_count = 0;
+//   static float offset = 0.1f;
 
-  if (!initialized)
-  {
-    for (int i = 0; i < 8; i++)
-    {
-      for (int j = 0; j < 8; j++)
-      {
-        SDL_FRect rect;
-        rect.h = GRID_CELL_SIZE * (1.0f - offset);
-        rect.w = GRID_CELL_SIZE * (1.0f - offset);
-        rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
-        rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
-        if (grid_walls[i * 8 + j])
-        {
-          black_rects[black_count++] = rect;
-        }
-        else
-        {
-          white_rects[white_count++] = rect;
-        }
-      }
-    }
-    initialized = true;
-  }
+//   if (!initialized)
+//   {
+//     for (int i = 0; i < 8; i++)
+//     {
+//       for (int j = 0; j < 8; j++)
+//       {
+//         SDL_FRect rect;
+//         rect.h = GRID_CELL_SIZE * (1.0f - offset);
+//         rect.w = GRID_CELL_SIZE * (1.0f - offset);
+//         rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
+//         rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
+//         if (grid_walls[i * 8 + j])
+//         {
+//           black_rects[black_count++] = rect;
+//         }
+//         else
+//         {
+//           white_rects[white_count++] = rect;
+//         }
+//       }
+//     }
+//     initialized = true;
+//   }
 
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderFillRects(renderer, white_rects, white_count);
+//   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+//   SDL_RenderFillRects(renderer, white_rects, white_count);
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderFillRects(renderer, black_rects, black_count);
-}
+//   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+//   SDL_RenderFillRects(renderer, black_rects, black_count);
+// }
 
 void rotate_player(Rotation_Type rotation, float delta_time)
 {
@@ -2509,8 +2461,8 @@ void move_player(float direction, bool is_sprinting, float delta_time)
   Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
   Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
 
-  if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
-      bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
+  if (top_left_map_cell_value == 'z' && top_right_map_cell_value == 'z' &&
+      bottom_left_map_cell_value == 'z' && bottom_right_map_cell_value == 'z')
   {
     player.rect.x = new_pos.x;
     player.rect.y = new_pos.y;
@@ -2598,9 +2550,8 @@ int main(int argc, char *argv[])
 {
   sdl_init();
 
-  Jagged_Grid *grid = read_grid_csv_file("./assets/levels/level-1.csv");
-  print_jagged_grid(grid);
-  free_jagged_grid(grid);
+  wall_grid = read_grid_csv_file("./assets/levels/level-1.csv");
+  print_jagged_grid(wall_grid);
 
   // brick_texture_init();
   // leaves_texture_init();
@@ -2608,10 +2559,9 @@ int main(int argc, char *argv[])
   // font_init();
   // player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);
-  // init_jagged_grid();
-  // run_game_loop();
+  run_game_loop();
 
-  // free_jagged_grid();
+  free_jagged_grid(wall_grid);
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(win);
