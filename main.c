@@ -2139,8 +2139,8 @@ static void player_init(void)
 static void create_2D_line_from_start_point(Line_2D *out_line, Degrees degrees, float length)
 {
   Radians radians = convert_deg_to_rads(degrees);
-  out_line->stop.x = out_line->start.x + length * cos(radians);
-  out_line->stop.y = out_line->start.y + length * sin(radians);
+  out_line->end.x = out_line->start.x + length * cos(radians);
+  out_line->end.y = out_line->start.y + length * sin(radians);
 }
 
 static void draw_player_direction(void)
@@ -2151,7 +2151,7 @@ static void draw_player_direction(void)
       .start.y = player.rect.y + PLAYER_H / 2,
   };
   create_2D_line_from_start_point(&line, player.angle, length);
-  SDL_RenderLine(renderer, line.start.x, line.start.y, line.stop.x, line.stop.y);
+  SDL_RenderLine(renderer, line.start.x, line.start.y, line.end.x, line.end.y);
 }
 
 static void draw_player_rect(void)
@@ -2259,8 +2259,8 @@ static void cast_rays_from_player(void)
         surface_hit = HORIZONTAL;
       }
 
-      ray.stop.x = world_next_wall_intersection_x;
-      ray.stop.y = world_next_wall_intersection_y;
+      ray.end.x = world_next_wall_intersection_x;
+      ray.end.y = world_next_wall_intersection_y;
 
       unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
       Wall_Type grid_1D_array_value = grid_walls[grid_1D_array_index];
@@ -2273,12 +2273,12 @@ static void cast_rays_from_player(void)
     }
 
     SDL_SetRenderDrawColor(renderer, r, g, b, a);
-    SDL_RenderLine(renderer, ray.start.x, ray.start.y, ray.stop.x, ray.stop.y);
+    SDL_RenderLine(renderer, ray.start.x, ray.start.y, ray.end.x, ray.end.y);
 
     /*
      * 2.5D Rendering
      */
-    Scalar ray_length = sqrt(pow(ray.start.x - ray.stop.x, 2) + pow(ray.start.y - ray.stop.y, 2));
+    Scalar ray_length = sqrt(pow(ray.start.x - ray.end.x, 2) + pow(ray.start.y - ray.end.y, 2));
     Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV_DEG) * (WINDOW_W / 2) + WINDOW_W / 2;
     Scalar perpendicular_distance = ray_length * cos(theta);
     Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
@@ -2386,27 +2386,23 @@ static void init_jagged_grid(void)
       .elements = malloc(2 * sizeof(Wall_Type)),
   };
 
-  jagged_grid_walls.rows[0].elements[1] = A;
-  jagged_grid_walls.rows[0].elements[2] = z;
-  jagged_grid_walls.rows[0].elements[3] = A;
-  jagged_grid_walls.rows[0].elements[4] = z;
+  jagged_grid_walls.rows[0].elements[0] = A;
+  jagged_grid_walls.rows[0].elements[1] = z;
+  jagged_grid_walls.rows[0].elements[2] = A;
+  jagged_grid_walls.rows[0].elements[3] = z;
 
-  jagged_grid_walls.rows[1].elements[3] = A;
-  jagged_grid_walls.rows[1].elements[4] = z;
+  jagged_grid_walls.rows[1].elements[0] = A;
+  jagged_grid_walls.rows[1].elements[1] = z;
 }
 
-Wall_Type get_jagged_row_element(unsigned int row, unsigned int col)
+static void free_jagged_grid(void)
 {
-  JaggedRow *current_row = &(&jagged_grid_walls)->rows[row];
-
-  if (col < current_row->start_index ||
-      col >= current_row->start_index + current_row->length)
+  // jagged_grid_walls.rows
+  for (int i = 0; i < jagged_grid_walls.num_rows; i++)
   {
-    printf("Invalid Wall\n");
+    free(jagged_grid_walls.rows[i].elements);
   }
-
-  int adjusted_col = col - current_row->start_index;
-  return current_row->elements[adjusted_col];
+  free(jagged_grid_walls.rows);
 }
 
 static void draw_jagged_grid(void)
@@ -2423,25 +2419,20 @@ static void draw_jagged_grid(void)
     for (int i = 0; i < JAGGED_GRID_ROWS; i++)
     {
       JaggedRow *current_row = &(&jagged_grid_walls)->rows[i];
-      int start_index = current_row->start_index;
-      int end_index = start_index + current_row->length;
-      printf("start index: %d\nend index: %d\n", start_index, end_index);
-      for (int j = start_index; j < end_index; j++)
+      int end_index = 0 + current_row->length;
+      for (int j = 0; j < end_index; j++)
       {
         SDL_FRect rect;
         rect.h = CELL_SIZE * (1.0f - offset);
         rect.w = CELL_SIZE * (1.0f - offset);
-        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2);
+        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2) + (j * CELL_SIZE * &(&jagged_grid_walls)->rows[i].offset);
         rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
         if (*(&(&jagged_grid_walls)->rows[i].elements[j]))
         {
-          printf("black\n");
-          printf("%d", *(&(&jagged_grid_walls)->rows[i].elements[j]));
           black_rects[black_count++] = rect;
         }
         else
         {
-          printf("white\n");
           white_rects[white_count++] = rect;
         }
       }
@@ -2508,66 +2499,66 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
 }
 
-Rect_2D convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
-{
-  Rect_2D player_hit_box_world = {
-      // Top-left
-      .tl.x = world_point->x - offset,
-      .tl.y = world_point->y - offset,
-      // Top-right
-      .tr.x = world_point->x + PLAYER_W + offset,
-      .tr.y = world_point->y - offset,
-      // Bottom-left
-      .bl.x = world_point->x - offset,
-      .bl.y = world_point->y + PLAYER_H + offset,
-      // Bottom-right
-      .br.x = world_point->x + PLAYER_W + offset,
-      .br.y = world_point->y + PLAYER_H + offset};
+// Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
+// {
+//   Hit_Box player_hit_box_world = {
+//       // Top-left
+//       .tl.x = world_point->x - offset,
+//       .tl.y = world_point->y - offset,
+//       // Top-right
+//       .tr.x = world_point->x + PLAYER_W + offset,
+//       .tr.y = world_point->y - offset,
+//       // Bottom-left
+//       .bl.x = world_point->x - offset,
+//       .bl.y = world_point->y + PLAYER_H + offset,
+//       // Bottom-right
+//       .br.x = world_point->x + PLAYER_W + offset,
+//       .br.y = world_point->y + PLAYER_H + offset};
 
-  Rect_2D player_hit_box_normalized = {
-      // Top-left
-      .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
-      .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
-      // Top-right
-      .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
-      .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
-      // Bottom-left
-      .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
-      .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
-      // Bottom-right
-      .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
-      .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
-  };
+//   Hit_Box player_hit_box_normalized = {
+//       // Top-left
+//       .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
+//       .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
+//       // Top-right
+//       .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
+//       .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
+//       // Bottom-left
+//       .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
+//       .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
+//       // Bottom-right
+//       .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
+//       .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
+//   };
 
-  return player_hit_box_normalized;
-}
+//   return player_hit_box_normalized;
+// }
 
-void move_player(float direction, bool is_sprinting, float delta_time)
-{
-  Point_2D new_pos = {
-      .x = player.rect.x + (direction * player.delta.x * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
-      .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
-  };
+// void move_player(float direction, bool is_sprinting, float delta_time)
+// {
+//   Point_2D new_pos = {
+//       .x = player.rect.x + (direction * player.delta.x * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
+//       .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
+//   };
 
-  Rect_2D new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
+//   Hit_Box new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
 
-  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
-  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
-  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
-  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
+//   unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
+//   unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
+//   unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
+//   unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
 
-  Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
-  Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
-  Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
-  Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
+//   Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
+//   Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
+//   Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
+//   Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
 
-  if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
-      bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
-  {
-    player.rect.x = new_pos.x;
-    player.rect.y = new_pos.y;
-  }
-}
+//   if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
+//       bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
+//   {
+//     player.rect.x = new_pos.x;
+//     player.rect.y = new_pos.y;
+//   }
+// }
 
 uint8_t get_kb_arrow_input_state(void)
 {
@@ -2602,11 +2593,11 @@ void handle_player_movement(float delta_time)
   }
   if (arrows_state & KEY_UP)
   {
-    move_player(FORWARDS, is_sprinting, delta_time);
+    // move_player(FORWARDS, is_sprinting, delta_time);
   }
   if (arrows_state & KEY_DOWN)
   {
-    move_player(BACKWARDS, is_sprinting, delta_time);
+    // move_player(BACKWARDS, is_sprinting, delta_time);
   }
 }
 
@@ -2657,6 +2648,8 @@ int main(int argc, char *argv[])
   keyboard_state = SDL_GetKeyboardState(NULL);
   init_jagged_grid();
   run_game_loop();
+
+  free_jagged_grid();
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(win);

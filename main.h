@@ -55,35 +55,13 @@ typedef int8_t Rotation_Type;
 typedef double Degrees;
 typedef double Radians;
 
-// typedef float Scalar;
-// typedef float Plane_1D;
-// typedef float Point_1D;
-// typedef int Grid_Point_1D;
-// typedef float Vector_1D;
-
-// typedef struct Vector_2D
-// {
-//   float x, y;
-// } Vector_2D;
-
-// typedef struct Point_2D
-// {
-//   Point_1D x, y;
-// } Point_2D;
-
-// typedef struct Line_2D
-// {
-//   Point_2D start;
-//   Point_2D stop;
-// } Line_2D;
-
-// typedef struct Rect_2D
-// {
-//   Point_2D tl;
-//   Point_2D tr;
-//   Point_2D bl;
-//   Point_2D br;
-// } Rect_2D;
+typedef struct
+{
+  Point_2D tl;
+  Point_2D tr;
+  Point_2D bl;
+  Point_2D br;
+} Hit_Box;
 
 typedef struct Player
 {
@@ -155,9 +133,9 @@ typedef enum Wall_Type
 
 typedef struct
 {
-  unsigned int start_index; // Where this row starts
-  unsigned int length;      // How many elements in this row
-  Wall_Type *elements;      // Pointer to the actual elements
+  int offset;          // Where this row starts
+  int length;          // How many elements in this row
+  Wall_Type *elements; // Pointer to the actual elements
 } JaggedRow;
 
 typedef struct
