@@ -1,5 +1,5 @@
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#ifndef MAIN_H
+#define MAIN_H
 
 // Window
 #define WINDOW_W 1024
@@ -24,11 +24,7 @@
 #define PLAYER_INTERACTION_DISTANCE 4.0f
 #define PLAYER_FOV_DEG 60
 #define PLAYER_FOV_DEG_INC 0.25f
-// Math Utils
-#define CLOCKWISE 1
-#define ANTI_CLOCKWISE -1
-#define BACKWARDS -1.0f
-#define FORWARDS 1.0f
+
 // Input helpers
 #define KEY_UP (1 << 0)
 #define KEY_DOWN (1 << 1)
@@ -52,39 +48,42 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_rect.h>
 
+#include "./types/algebraic-types.h"
+#include "./utils/math-utils.h"
+
 typedef int8_t Rotation_Type;
 typedef double Degrees;
 typedef double Radians;
 
-typedef float Scalar;
-typedef float Plane_1D;
-typedef float Point_1D;
-typedef int Grid_Point_1D;
-typedef float Vector_1D;
+// typedef float Scalar;
+// typedef float Plane_1D;
+// typedef float Point_1D;
+// typedef int Grid_Point_1D;
+// typedef float Vector_1D;
 
-typedef struct Vector_2D
-{
-  float x, y;
-} Vector_2D;
+// typedef struct Vector_2D
+// {
+//   float x, y;
+// } Vector_2D;
 
-typedef struct Point_2D
-{
-  Point_1D x, y;
-} Point_2D;
+// typedef struct Point_2D
+// {
+//   Point_1D x, y;
+// } Point_2D;
 
-typedef struct Line_2D
-{
-  Point_2D start;
-  Point_2D stop;
-} Line_2D;
+// typedef struct Line_2D
+// {
+//   Point_2D start;
+//   Point_2D stop;
+// } Line_2D;
 
-typedef struct Rect_2D
-{
-  Point_2D tl;
-  Point_2D tr;
-  Point_2D bl;
-  Point_2D br;
-} Rect_2D;
+// typedef struct Rect_2D
+// {
+//   Point_2D tl;
+//   Point_2D tr;
+//   Point_2D bl;
+//   Point_2D br;
+// } Rect_2D;
 
 typedef struct Player
 {

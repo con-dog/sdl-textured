@@ -9,10 +9,8 @@ DATA_DIR = data
 IO_DIR = graphics
 OBJECTS_DIR = objects
 TEXTURES_DIR = textures
+TYPES_DIR = types
 UTILS_DIR = utils
-
-# Texture subdirectories
-BRICKS_DIR = $(TEXTURES_DIR)/bricks
 
 # Include paths
 INCLUDES = \
@@ -21,7 +19,6 @@ INCLUDES = \
     -I$(IO_DIR) \
     -I$(OBJECTS_DIR) \
     -I$(TEXTURES_DIR) \
-    	-I$(BRICKS_DIR) \
     -I$(UTILS_DIR)
 
 # Source files (excluding main)
@@ -30,10 +27,11 @@ DATA_SRC = $(wildcard $(DATA_DIR)/**/*.c)
 IO_SRC = $(wildcard $(IO_DIR)/**/*.c)
 OBJECTS_SRC = $(wildcard $(OBJECTS_DIR)/**/*.c)
 TEXTURES_SRC = $(wildcard $(TEXTURES_DIR)/**/*.c)
+TYPES_SRC = $(wildcard $(TYPES_DIR)/**/*.c)
 UTILS_SRC = $(wildcard $(UTILS_DIR)/**/*.c)
 
 # All source files (excluding main)
-SRC = $(CONFIG_SRC) $(DATA_SRC) $(IO_SRC) $(OBJECTS_SRC) $(TEXTURES_SRC) $(UTILS_SRC)
+SRC = $(CONFIG_SRC) $(DATA_SRC) $(IO_SRC) $(OBJECTS_SRC) $(TEXTURES_SRC) $(TYPES_SRC) $(UTILS_SRC)
 
 # Object files (excluding main)
 OBJ = $(SRC:.c=.o)
