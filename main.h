@@ -26,6 +26,7 @@
 #include "./data/grid/constants.h"
 #include "./data/grid/types.h"
 #include "./data/wall/types.h"
+#include "./io/level-io.h"
 #include "./objects/types.h"
 #include "./objects/player/constants.h"
 #include "./objects/player/types.h"

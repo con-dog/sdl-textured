@@ -2352,15 +2352,15 @@ static void init_jagged_grid(void)
   jagged_grid_walls.rows[1].elements[1] = z;
 }
 
-static void free_jagged_grid(void)
-{
-  // jagged_grid_walls.rows
-  for (int i = 0; i < jagged_grid_walls.num_rows; i++)
-  {
-    free(jagged_grid_walls.rows[i].elements);
-  }
-  free(jagged_grid_walls.rows);
-}
+// static void free_jagged_grid(void)
+// {
+//   // jagged_grid_walls.rows
+//   for (int i = 0; i < jagged_grid_walls.num_rows; i++)
+//   {
+//     free(jagged_grid_walls.rows[i].elements);
+//   }
+//   free(jagged_grid_walls.rows);
+// }
 
 static void draw_jagged_grid(void)
 {
@@ -2597,16 +2597,20 @@ void run_game_loop(void)
 int main(int argc, char *argv[])
 {
   sdl_init();
+
+  Jagged_Grid *grid = read_grid_csv_file("./assets/levels/level-1.csv");
+  print_jagged_grid(grid);
+
   // brick_texture_init();
   // leaves_texture_init();
   // flowers_texture_init();
   // font_init();
   // player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);
-  init_jagged_grid();
-  run_game_loop();
+  // init_jagged_grid();
+  // run_game_loop();
 
-  free_jagged_grid();
+  // free_jagged_grid();
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(win);
