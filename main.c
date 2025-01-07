@@ -1,6 +1,6 @@
 
 
-#include "program.h"
+#include "main.h"
 
 static const struct
 {
