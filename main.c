@@ -2355,47 +2355,6 @@ static void draw_jagged_grid(void)
   }
 }
 
-// static void
-// draw_map(void)
-// {
-//   static bool initialized = false;
-//   static SDL_FRect black_rects[64];
-//   static SDL_FRect white_rects[64];
-//   static int black_count = 0;
-//   static int white_count = 0;
-//   static float offset = 0.1f;
-
-//   if (!initialized)
-//   {
-//     for (int i = 0; i < 8; i++)
-//     {
-//       for (int j = 0; j < 8; j++)
-//       {
-//         SDL_FRect rect;
-//         rect.h = GRID_CELL_SIZE * (1.0f - offset);
-//         rect.w = GRID_CELL_SIZE * (1.0f - offset);
-//         rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
-//         rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
-//         if (grid_walls[i * 8 + j])
-//         {
-//           black_rects[black_count++] = rect;
-//         }
-//         else
-//         {
-//           white_rects[white_count++] = rect;
-//         }
-//       }
-//     }
-//     initialized = true;
-//   }
-
-//   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-//   SDL_RenderFillRects(renderer, white_rects, white_count);
-
-//   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-//   SDL_RenderFillRects(renderer, black_rects, black_count);
-// }
-
 void rotate_player(Rotation_Type rotation, float delta_time)
 {
   player.angle = player.angle + (rotation * PLAYER_ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
@@ -2408,7 +2367,7 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
 }
 
-Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
+Hit_Box convert_world_position_to_grid_position(Point_2D *world_point, float offset)
 {
   Hit_Box player_hit_box_world = {
       // Top-left
@@ -2424,7 +2383,7 @@ Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, floa
       .br.x = world_point->x + PLAYER_W + offset,
       .br.y = world_point->y + PLAYER_H + offset};
 
-  Hit_Box player_hit_box_normalized = {
+  Hit_Box player_hit_box_grid = {
       // Top-left
       .tl.x = floorf(player_hit_box_world.tl.x / GRID_CELL_SIZE),
       .tl.y = floorf(player_hit_box_world.tl.y / GRID_CELL_SIZE),
@@ -2439,7 +2398,7 @@ Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, floa
       .br.y = floorf(player_hit_box_world.br.y / GRID_CELL_SIZE),
   };
 
-  return player_hit_box_normalized;
+  return player_hit_box_grid;
 }
 
 void move_player(float direction, bool is_sprinting, float delta_time)
@@ -2449,12 +2408,12 @@ void move_player(float direction, bool is_sprinting, float delta_time)
       .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
   };
 
-  Hit_Box new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
+  Hit_Box player_hit_box_normalized = convert_world_position_to_grid_position(&new_pos, PLAYER_INTERACTION_DISTANCE);
 
-  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * 8) + new_pos_2D_hit_box_normalized.tl.x;
-  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * 8) + new_pos_2D_hit_box_normalized.tr.x;
-  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * 8) + new_pos_2D_hit_box_normalized.bl.x;
-  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * 8) + new_pos_2D_hit_box_normalized.br.x;
+  unsigned int top_left_map_cell_index = (player_hit_box_normalized.tl.y * 8) + player_hit_box_normalized.tl.x;
+  unsigned int top_right_map_cell_index = (player_hit_box_normalized.tr.y * 8) + player_hit_box_normalized.tr.x;
+  unsigned int bottom_left_map_cell_index = (player_hit_box_normalized.bl.y * 8) + player_hit_box_normalized.bl.x;
+  unsigned int bottom_right_map_cell_index = (player_hit_box_normalized.br.y * 8) + player_hit_box_normalized.br.x;
 
   Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
   Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
@@ -2487,7 +2446,6 @@ void handle_player_movement(float delta_time)
 {
   uint8_t arrows_state = get_kb_arrow_input_state();
   bool is_sprinting = false;
-
   if (keyboard_state[SDL_SCANCODE_LSHIFT] || keyboard_state[SDL_SCANCODE_RSHIFT])
   {
     is_sprinting = true;
@@ -2502,11 +2460,11 @@ void handle_player_movement(float delta_time)
   }
   if (arrows_state & KEY_UP)
   {
-    // move_player(FORWARDS, is_sprinting, delta_time);
+    move_player(FORWARDS, is_sprinting, delta_time);
   }
   if (arrows_state & KEY_DOWN)
   {
-    // move_player(BACKWARDS, is_sprinting, delta_time);
+    move_player(BACKWARDS, is_sprinting, delta_time);
   }
 }
 
@@ -2515,8 +2473,7 @@ void update_display(void)
   SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255); // White background
   SDL_RenderClear(renderer);
   draw_jagged_grid();
-  // draw_map();
-  // draw_player();
+  draw_player();
   // cast_rays_from_player();
   SDL_RenderPresent(renderer);
 }
@@ -2541,7 +2498,7 @@ void run_game_loop(void)
       }
     }
 
-    // handle_player_movement(delta_time);
+    handle_player_movement(delta_time);
     update_display();
   }
 }
@@ -2551,13 +2508,13 @@ int main(int argc, char *argv[])
   sdl_init();
 
   wall_grid = read_grid_csv_file("./assets/levels/level-1.csv");
-  print_jagged_grid(wall_grid);
+  // print_jagged_grid(wall_grid);
 
   // brick_texture_init();
   // leaves_texture_init();
   // flowers_texture_init();
   // font_init();
-  // player_init();
+  player_init();
   keyboard_state = SDL_GetKeyboardState(NULL);
   run_game_loop();
 
