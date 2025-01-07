@@ -2367,7 +2367,7 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
 }
 
-Hit_Box convert_world_position_to_grid_position(Point_2D *world_point, float offset)
+Grid_Hit_Box convert_world_position_to_grid_position(Point_2D *world_point, float offset)
 {
   Hit_Box player_hit_box_world = {
       // Top-left
@@ -2383,19 +2383,19 @@ Hit_Box convert_world_position_to_grid_position(Point_2D *world_point, float off
       .br.x = world_point->x + PLAYER_W + offset,
       .br.y = world_point->y + PLAYER_H + offset};
 
-  Hit_Box player_hit_box_grid = {
+  Grid_Hit_Box player_hit_box_grid = {
       // Top-left
-      .tl.x = floorf(player_hit_box_world.tl.x / GRID_CELL_SIZE),
-      .tl.y = floorf(player_hit_box_world.tl.y / GRID_CELL_SIZE),
+      .tl.x = floor(player_hit_box_world.tl.x / GRID_CELL_SIZE),
+      .tl.y = floor(player_hit_box_world.tl.y / GRID_CELL_SIZE),
       // Top-right
-      .tr.x = floorf(player_hit_box_world.tr.x / GRID_CELL_SIZE),
-      .tr.y = floorf(player_hit_box_world.tr.y / GRID_CELL_SIZE),
+      .tr.x = floor(player_hit_box_world.tr.x / GRID_CELL_SIZE),
+      .tr.y = floor(player_hit_box_world.tr.y / GRID_CELL_SIZE),
       // Bottom-left
-      .bl.x = floorf(player_hit_box_world.bl.x / GRID_CELL_SIZE),
-      .bl.y = floorf(player_hit_box_world.bl.y / GRID_CELL_SIZE),
+      .bl.x = floor(player_hit_box_world.bl.x / GRID_CELL_SIZE),
+      .bl.y = floor(player_hit_box_world.bl.y / GRID_CELL_SIZE),
       // Bottom-right
-      .br.x = floorf(player_hit_box_world.br.x / GRID_CELL_SIZE),
-      .br.y = floorf(player_hit_box_world.br.y / GRID_CELL_SIZE),
+      .br.x = floor(player_hit_box_world.br.x / GRID_CELL_SIZE),
+      .br.y = floor(player_hit_box_world.br.y / GRID_CELL_SIZE),
   };
 
   return player_hit_box_grid;
@@ -2408,20 +2408,20 @@ void move_player(float direction, bool is_sprinting, float delta_time)
       .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
   };
 
-  Hit_Box player_hit_box_normalized = convert_world_position_to_grid_position(&new_pos, PLAYER_INTERACTION_DISTANCE);
+  Grid_Hit_Box player_hit_box_grid = convert_world_position_to_grid_position(&new_pos, PLAYER_INTERACTION_DISTANCE);
 
-  unsigned int top_left_map_cell_index = (player_hit_box_normalized.tl.y * 8) + player_hit_box_normalized.tl.x;
-  unsigned int top_right_map_cell_index = (player_hit_box_normalized.tr.y * 8) + player_hit_box_normalized.tr.x;
-  unsigned int bottom_left_map_cell_index = (player_hit_box_normalized.bl.y * 8) + player_hit_box_normalized.bl.x;
-  unsigned int bottom_right_map_cell_index = (player_hit_box_normalized.br.y * 8) + player_hit_box_normalized.br.x;
+  Jagged_Row *tl_grid_cell_row = &wall_grid->rows[player_hit_box_grid.tl.y];
+  Jagged_Row *tr_grid_cell_row = &wall_grid->rows[player_hit_box_grid.tr.y];
+  Jagged_Row *bl_grid_cell_row = &wall_grid->rows[player_hit_box_grid.bl.y];
+  Jagged_Row *br_grid_cell_row = &wall_grid->rows[player_hit_box_grid.br.y];
 
-  Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
-  Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
-  Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
-  Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
+  Wall_Type tl_grid_cell_value = tl_grid_cell_row->elements[player_hit_box_grid.tl.x];
+  Wall_Type tr_grid_cell_value = tr_grid_cell_row->elements[player_hit_box_grid.tr.x];
+  Wall_Type bl_grid_cell_value = bl_grid_cell_row->elements[player_hit_box_grid.bl.x];
+  Wall_Type br_grid_cell_value = br_grid_cell_row->elements[player_hit_box_grid.br.x];
 
-  if (top_left_map_cell_value == 'z' && top_right_map_cell_value == 'z' &&
-      bottom_left_map_cell_value == 'z' && bottom_right_map_cell_value == 'z')
+  if (tl_grid_cell_value == 'z' && tr_grid_cell_value == 'z' &&
+      bl_grid_cell_value == 'z' && br_grid_cell_value == 'z')
   {
     player.rect.x = new_pos.x;
     player.rect.y = new_pos.y;

@@ -13,7 +13,7 @@ typedef float Vector_1D;
 /*
  * 2 dimensions
  */
-typedef struct
+typedef struct Grid_Point_2D
 {
   Grid_Point_1D x;
   Grid_Point_1D y;
