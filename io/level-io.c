@@ -91,8 +91,8 @@ extern void print_jagged_grid(const Jagged_Grid *grid)
   printf("Grid has %d rows:\n", grid->num_rows);
   for (int i = 0; i < grid->num_rows; i++)
   {
-    printf("Row %d: x_offset=%d, length=%d, elements=",
-           i, grid->rows[i].x_offset, grid->rows[i].length);
+    printf("Row %d:  length=%d, elements=",
+           i, grid->rows[i].length);
 
     // Print elements if they exist
     if (grid->rows[i].elements)
@@ -110,12 +110,11 @@ extern void print_jagged_grid(const Jagged_Grid *grid)
   }
 }
 
-// Manipulate rows
 static void process_row(char *line, Jagged_Row *row)
 {
-  // First pass: find first and last letter positions
-  int first_letter = -1;
+  // First pass: find last letter position and check if row has any content
   int last_letter = -1;
+  int has_content = 0;
   int current_pos = 0;
 
   // Create a copy of the line for first pass
@@ -133,29 +132,26 @@ static void process_row(char *line, Jagged_Row *row)
     // Check if it's a non-empty cell
     if (*token)
     { // If there's any character after whitespace
-      if (first_letter == -1)
-      {
-        first_letter = current_pos;
-      }
+      has_content = 1;
       last_letter = current_pos;
     }
     current_pos++;
   }
   free(line_copy);
 
-  // Store x_offset
-  row->x_offset = (first_letter == -1) ? 0 : first_letter;
-
-  // If no letters found, create empty row
-  if (first_letter == -1 || last_letter == -1)
+  // If the row has content, start from position 0
+  // If no content, create empty row
+  if (!has_content)
   {
     row->length = 0;
     row->elements = NULL;
     return;
   }
 
-  // Allocate array for the trimmed size
-  row->length = last_letter - first_letter + 1;
+  // Always start from position 0 if we have content
+  row->length = last_letter + 1; // +1 because last_letter is 0-based
+
+  // Allocate array
   row->elements = malloc(row->length * sizeof(Wall_Type));
   if (!row->elements)
   {
@@ -167,25 +163,20 @@ static void process_row(char *line, Jagged_Row *row)
   line_copy = strdup(line);
   pos = line_copy;
   current_pos = 0;
-  int output_pos = 0;
 
-  while ((token = strsep(&pos, ",")) != NULL)
+  while ((token = strsep(&pos, ",")) != NULL && current_pos < row->length)
   {
     // Strip whitespace and newline
     while (*token && (isspace(*token) || *token == '\n'))
       token++;
 
-    if (current_pos >= first_letter && current_pos <= last_letter)
+    if (!*token)
+    { // Empty cell
+      row->elements[current_pos] = 'z';
+    }
+    else
     {
-      if (!*token)
-      { // Empty cell between letters
-        row->elements[output_pos] = 'z';
-      }
-      else
-      {
-        row->elements[output_pos] = *token;
-      }
-      output_pos++;
+      row->elements[current_pos] = *token;
     }
     current_pos++;
   }

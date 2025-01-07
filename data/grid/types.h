@@ -5,7 +5,6 @@
 
 typedef struct
 {
-  int x_offset;        // Displacement in x direction when elements shown in grid
   int length;          // How many elements in this row
   Wall_Type *elements; // Pointer to the elements
 } Jagged_Row;

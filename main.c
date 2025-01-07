@@ -2336,7 +2336,7 @@ static void draw_jagged_grid(void)
       SDL_FRect rect;
       rect.h = GRID_CELL_SIZE * (1.0f - offset);
       rect.w = GRID_CELL_SIZE * (1.0f - offset);
-      rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2) + (GRID_CELL_SIZE * current_row->x_offset);
+      rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
       rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
       if (wall_grid->rows[i].elements[j] != 'z')
       {
@@ -2508,6 +2508,7 @@ int main(int argc, char *argv[])
   sdl_init();
 
   wall_grid = read_grid_csv_file("./assets/levels/level-1.csv");
+  print_jagged_grid(wall_grid);
   // print_jagged_grid(wall_grid);
 
   // brick_texture_init();
