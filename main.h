@@ -52,8 +52,6 @@
 #include "./utils/math-utils.h"
 
 typedef int8_t Rotation_Type;
-typedef double Degrees;
-typedef double Radians;
 
 typedef struct
 {
@@ -69,29 +67,6 @@ typedef struct Player
   Vector_2D delta;
   Degrees angle; // degrees
 } Player;
-
-typedef struct Player_Pos
-{
-  float x, y, dx, dy; // Coordinates
-  const float w, h;   // Width, Height
-  double angle;       // Angle in Degrees
-} Player_Pos;
-
-typedef struct Ray_Pos
-{
-  float x0, x1, y0, y1;
-  float x_dir, y_dir;
-  const float length;
-} Ray_Pos;
-
-typedef struct DDA_Algo
-{
-  Vector_2D step;
-  Vector_2D delta;
-  Vector_2D map_pos;
-  Vector_2D side_dist;
-  Vector_2D wall;
-} DDA_Algo;
 
 typedef enum Wall_Surface_Hit
 {
@@ -133,7 +108,7 @@ typedef enum Wall_Type
 
 typedef struct
 {
-  int offset;          // Where this row starts
+  int x_offset;        // Displacement in x direction in Grid
   int length;          // How many elements in this row
   Wall_Type *elements; // Pointer to the actual elements
 } JaggedRow;
