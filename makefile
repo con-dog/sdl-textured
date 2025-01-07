@@ -52,6 +52,11 @@ $(TARGET): main.o $(OBJ)
 
 clean:
 	rm -f $(TARGET) $(OBJ) main.o
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.so" -delete
+	find . -type f -name "*.a" -delete
+	find . -type f -name "*.d" -delete
+	find . -type f -name "*.gch" -delete
 
 rebuild: clean all
 
