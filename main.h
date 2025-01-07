@@ -34,60 +34,11 @@
 #include <SDL3/SDL_rect.h>
 
 #include "./config/config.h"
+#include "./data/grid/types.h"
+#include "./data/wall/types.h"
 #include "./objects/types.h"
 #include "./objects/player/player.h"
 #include "./types/algebraic-types.h"
 #include "./utils/math-utils.h"
-
-typedef enum Wall_Surface_Hit
-{
-  HORIZONTAL,
-  VERTICAL,
-} Wall_Surface_Hit;
-
-// clang-format off
-typedef enum Wall_Type
-{
-  /* EMPTY */
-  z,
-  /* FULL */
-  A, B, C, D,    // * BRICK
-  E,
-  F,
-  G,
-  H,
-  I,
-  J,
-  K,
-  L,
-  M,
-  N,
-  O,
-  P,
-  Q,
-  R,
-  S,
-  T,
-  U,
-  V,
-  W,
-  X,
-  Y,
-  Z
-} Wall_Type;
-// clang-format on
-
-typedef struct
-{
-  int x_offset;        // Displacement in x direction in Grid
-  int length;          // How many elements in this row
-  Wall_Type *elements; // Pointer to the actual elements
-} JaggedRow;
-
-typedef struct
-{
-  int num_rows;    // Total number of rows
-  JaggedRow *rows; // Array of row descriptors
-} JaggedGrid;
 
 #endif

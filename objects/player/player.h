@@ -12,5 +12,4 @@
 #define PLAYER_SPEED 15.0f
 #define SPRINT_SPEED_INCREASE 15.0f
 
-
 #endif

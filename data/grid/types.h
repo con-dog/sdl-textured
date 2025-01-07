@@ -1,0 +1,19 @@
+#ifndef DATA_GRID_H
+#define DATA_GRID_H
+
+#include "../wall/types.h"
+
+typedef struct
+{
+  int x_offset;        // Displacement in x direction when elements shown in grid
+  int length;          // How many elements in this row
+  Wall_Type *elements; // Pointer to the elements
+} Jagged_Row;
+
+typedef struct
+{
+  int num_rows;     // Total number of rows
+  Jagged_Row *rows; // Array of Jagged_Rows
+} Jagged_Grid;
+
+#endif

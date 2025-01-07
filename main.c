@@ -2037,7 +2037,7 @@ const static Wall_Type grid_walls[GRID_SIZE] = {
 };
 // clang-format on
 
-JaggedGrid jagged_grid_walls;
+Jagged_Grid jagged_grid_walls;
 
 static int sdl_init()
 {
@@ -2192,7 +2192,7 @@ static void cast_rays_from_player(void)
     Point_1D world_next_wall_intersection_y;
 
     bool is_surface_hit = false;
-    Wall_Surface_Hit surface_hit;
+    Wall_Surface surface_hit;
     while (!is_surface_hit)
     {
       if (x_distance_to_next_vertical_cell_edge_normalized < y_distance_to_next_horizontal_cell_edge_normalized)
@@ -2203,7 +2203,7 @@ static void cast_rays_from_player(void)
         world_next_wall_intersection_y = ray.start.y + (world_next_wall_intersection_x - ray.start.x) * y_direction / x_direction;
         x_distance_to_next_vertical_cell_edge_normalized += delta_x;
         grid_x += step_x;
-        surface_hit = VERTICAL;
+        surface_hit = WS_VERTICAL;
       }
       else
       {
@@ -2213,7 +2213,7 @@ static void cast_rays_from_player(void)
         world_next_wall_intersection_x = ray.start.x + (world_next_wall_intersection_y - ray.start.y) * x_direction / y_direction;
         y_distance_to_next_horizontal_cell_edge_normalized += delta_y;
         grid_y += step_y;
-        surface_hit = HORIZONTAL;
+        surface_hit = WS_HORIZONTAL;
       }
 
       ray.end.x = world_next_wall_intersection_x;
@@ -2253,7 +2253,7 @@ static void cast_rays_from_player(void)
 
     Point_1D wall_x;
     Point_1D texture_x;
-    if (surface_hit == VERTICAL)
+    if (surface_hit == WS_VERTICAL)
     {
       wall_x = world_next_wall_intersection_y;
       Point_1D wall_x_normalized = wall_x / CELL_SIZE;
@@ -2329,15 +2329,15 @@ static void init_jagged_grid(void)
 {
 
   jagged_grid_walls.num_rows = JAGGED_GRID_ROWS;
-  jagged_grid_walls.rows = malloc(JAGGED_GRID_ROWS * sizeof(JaggedRow));
+  jagged_grid_walls.rows = malloc(JAGGED_GRID_ROWS * sizeof(Jagged_Row));
 
-  jagged_grid_walls.rows[0] = (JaggedRow){
+  jagged_grid_walls.rows[0] = (Jagged_Row){
       .x_offset = 1,
       .length = 4,
       .elements = malloc(4 * sizeof(Wall_Type)),
   };
 
-  jagged_grid_walls.rows[1] = (JaggedRow){
+  jagged_grid_walls.rows[1] = (Jagged_Row){
       .x_offset = 3,
       .length = 2,
       .elements = malloc(2 * sizeof(Wall_Type)),
@@ -2375,7 +2375,7 @@ static void draw_jagged_grid(void)
   {
     for (int i = 0; i < JAGGED_GRID_ROWS; i++)
     {
-      JaggedRow *current_row = &(&jagged_grid_walls)->rows[i];
+      Jagged_Row *current_row = &(&jagged_grid_walls)->rows[i];
       int end_index = 0 + current_row->length;
       for (int j = 0; j < end_index; j++)
       {
