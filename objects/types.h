@@ -18,7 +18,7 @@ typedef struct Player
 {
   SDL_FRect rect;
   Vector_2D delta;
-  Degrees angle; // degrees
+  Degrees   angle; // degrees
 } Player;
 
 #endif

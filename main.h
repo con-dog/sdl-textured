@@ -1,11 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-// Window
-#define WINDOW_W 1024
-#define WINDOW_H 512
-// Font
-#define FONT_SMALL 12
 // Map
 #define CELL_SIZE 64.0f
 #define GRID_ROWS 8
@@ -14,16 +9,6 @@
 
 #define JAGGED_GRID_ROWS 2
 // Player
-#define PLAYER_W 8.0f
-#define PLAYER_H 8.0f
-#define MOTION_DELTA_MULTIPLIER 5
-#define ROTATION_STEP 5.0f
-#define PLAYER_SPEED 15.0f
-#define SPRINT_SPEED_INCREASE 15.0f
-#define PLAYER_ROTATION_SPEED 30.0f
-#define PLAYER_INTERACTION_DISTANCE 4.0f
-#define PLAYER_FOV_DEG 60
-#define PLAYER_FOV_DEG_INC 0.25f
 
 // Input helpers
 #define KEY_UP (1 << 0)
@@ -48,7 +33,9 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_rect.h>
 
+#include "./config/config.h"
 #include "./objects/types.h"
+#include "./objects/player/player.h"
 #include "./types/algebraic-types.h"
 #include "./utils/math-utils.h"
 

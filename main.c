@@ -2127,8 +2127,8 @@ static void player_init(void)
   player.angle = 0.0f;
 
   Radians radians = convert_deg_to_rads(player.angle);
-  player.delta.x = cos(radians) * MOTION_DELTA_MULTIPLIER;
-  player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
+  player.delta.x = cos(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
 }
 
 static void create_2D_line_from_start_point(Line_2D *out_line, Degrees degrees, float length)
@@ -2446,14 +2446,14 @@ draw_map(void)
 
 void rotate_player(Rotation_Type rotation, float delta_time)
 {
-  player.angle = player.angle + (rotation * ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
+  player.angle = player.angle + (rotation * PLAYER_ROTATION_STEP * PLAYER_ROTATION_SPEED * delta_time);
   player.angle = (player.angle < 0) ? 360
                  : (player.angle > 360)
                      ? 0
                      : player.angle;
   Radians radians = convert_deg_to_rads(player.angle);
-  player.delta.x = cos(radians) * MOTION_DELTA_MULTIPLIER;
-  player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
+  player.delta.x = cos(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
+  player.delta.y = sin(radians) * PLAYER_MOTION_DELTA_MULTIPLIER;
 }
 
 Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
