@@ -2025,7 +2025,7 @@ TTF_Font *font;
 const bool *keyboard_state;
 
 // clang-format off
-const static Wall_Type grid_walls[GRID_SIZE] = {
+const static Wall_Type grid_walls[64] = {
   A, A, A, A, A, A, A, A,
   A, z, B, z, z, z, z, A,
   A, z, B, z, z, z, z, A,
@@ -2176,10 +2176,10 @@ static void cast_rays_from_player(void)
     Vector_1D step_y = (y_direction >= 0) ? 1 : -1;
     Vector_1D delta_x = fabs(1.0f / x_direction);
     Vector_1D delta_y = fabs(1.0f / y_direction);
-    Grid_Point_1D grid_x = floorf(ray.start.x / CELL_SIZE);
-    Grid_Point_1D grid_y = floorf(ray.start.y / CELL_SIZE);
-    Point_1D world_x_normalized = ray.start.x / CELL_SIZE;
-    Point_1D world_y_normalized = ray.start.y / CELL_SIZE;
+    Grid_Point_1D grid_x = floorf(ray.start.x / GRID_CELL_SIZE);
+    Grid_Point_1D grid_y = floorf(ray.start.y / GRID_CELL_SIZE);
+    Point_1D world_x_normalized = ray.start.x / GRID_CELL_SIZE;
+    Point_1D world_y_normalized = ray.start.y / GRID_CELL_SIZE;
 
     Vector_1D x_distance_to_next_vertical_cell_edge_normalized = (x_direction < 0)
                                                                      ? (world_x_normalized - grid_x) * delta_x
@@ -2198,8 +2198,8 @@ static void cast_rays_from_player(void)
       if (x_distance_to_next_vertical_cell_edge_normalized < y_distance_to_next_horizontal_cell_edge_normalized)
       {
         world_next_wall_intersection_x = (x_direction < 0)
-                                             ? grid_x * CELL_SIZE
-                                             : (grid_x + 1) * CELL_SIZE;
+                                             ? grid_x * GRID_CELL_SIZE
+                                             : (grid_x + 1) * GRID_CELL_SIZE;
         world_next_wall_intersection_y = ray.start.y + (world_next_wall_intersection_x - ray.start.x) * y_direction / x_direction;
         x_distance_to_next_vertical_cell_edge_normalized += delta_x;
         grid_x += step_x;
@@ -2208,8 +2208,8 @@ static void cast_rays_from_player(void)
       else
       {
         world_next_wall_intersection_y = (y_direction < 0)
-                                             ? grid_y * CELL_SIZE
-                                             : (grid_y + 1) * CELL_SIZE;
+                                             ? grid_y * GRID_CELL_SIZE
+                                             : (grid_y + 1) * GRID_CELL_SIZE;
         world_next_wall_intersection_x = ray.start.x + (world_next_wall_intersection_y - ray.start.y) * x_direction / y_direction;
         y_distance_to_next_horizontal_cell_edge_normalized += delta_y;
         grid_y += step_y;
@@ -2219,7 +2219,7 @@ static void cast_rays_from_player(void)
       ray.end.x = world_next_wall_intersection_x;
       ray.end.y = world_next_wall_intersection_y;
 
-      unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+      unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
       Wall_Type grid_1D_array_value = grid_walls[grid_1D_array_index];
 
       if (grid_1D_array_value != z)
@@ -2238,7 +2238,7 @@ static void cast_rays_from_player(void)
     Scalar ray_length = sqrt(pow(ray.start.x - ray.end.x, 2) + pow(ray.start.y - ray.end.y, 2));
     Point_1D ray_screen_position_x = ((current_angle - start_angle) / PLAYER_FOV_DEG) * (WINDOW_W / 2) + WINDOW_W / 2;
     Scalar perpendicular_distance = ray_length * cos(theta);
-    Scalar vertical_strip_height = (CELL_SIZE * WINDOW_H) / perpendicular_distance;
+    Scalar vertical_strip_height = (GRID_CELL_SIZE * WINDOW_H) / perpendicular_distance;
     Scalar vertical_strip_width = (WINDOW_W / 2) / ((end_angle - start_angle) / PLAYER_FOV_DEG_INC);
 
     // Center line vertically
@@ -2256,18 +2256,18 @@ static void cast_rays_from_player(void)
     if (surface_hit == WS_VERTICAL)
     {
       wall_x = world_next_wall_intersection_y;
-      Point_1D wall_x_normalized = wall_x / CELL_SIZE;
+      Point_1D wall_x_normalized = wall_x / GRID_CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
       texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
     }
     else
     {
       wall_x = world_next_wall_intersection_x;
-      Point_1D wall_x_normalized = wall_x / CELL_SIZE;
+      Point_1D wall_x_normalized = wall_x / GRID_CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
       texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
 
-      unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+      unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
     }
     // Brightness transformations
     // Uint8 brightness = (Uint8)(255.0f * (1.0f - (perpendicular_distance / (64 * 16))));
@@ -2276,7 +2276,7 @@ static void cast_rays_from_player(void)
     SDL_SetTextureColorMod(leaves_texture, brightness, brightness, brightness);
     SDL_SetTextureColorMod(flowers_texture, brightness, brightness, brightness);
 
-    unsigned int grid_1D_array_index = (grid_y * GRID_ROWS) + grid_x;
+    unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
     switch (grid_walls[grid_1D_array_index])
     {
     case A:
@@ -2328,8 +2328,8 @@ void draw_player(void)
 static void init_jagged_grid(void)
 {
 
-  jagged_grid_walls.num_rows = JAGGED_GRID_ROWS;
-  jagged_grid_walls.rows = malloc(JAGGED_GRID_ROWS * sizeof(Jagged_Row));
+  jagged_grid_walls.num_rows = 2;
+  jagged_grid_walls.rows = malloc(2 * sizeof(Jagged_Row));
 
   jagged_grid_walls.rows[0] = (Jagged_Row){
       .x_offset = 1,
@@ -2365,25 +2365,25 @@ static void free_jagged_grid(void)
 static void draw_jagged_grid(void)
 {
   static bool initialized = false;
-  static SDL_FRect black_rects[GRID_SIZE];
-  static SDL_FRect white_rects[GRID_SIZE];
+  static SDL_FRect black_rects[64];
+  static SDL_FRect white_rects[64];
   static int black_count = 0;
   static int white_count = 0;
   static float offset = 0.1f;
 
   if (!initialized)
   {
-    for (int i = 0; i < JAGGED_GRID_ROWS; i++)
+    for (int i = 0; i < 2; i++)
     {
       Jagged_Row *current_row = &(&jagged_grid_walls)->rows[i];
       int end_index = 0 + current_row->length;
       for (int j = 0; j < end_index; j++)
       {
         SDL_FRect rect;
-        rect.h = CELL_SIZE * (1.0f - offset);
-        rect.w = CELL_SIZE * (1.0f - offset);
-        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2) + (j * CELL_SIZE + 64);
-        rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
+        rect.h = GRID_CELL_SIZE * (1.0f - offset);
+        rect.w = GRID_CELL_SIZE * (1.0f - offset);
+        rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2) + (j * GRID_CELL_SIZE + 64);
+        rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
         if (*(&(&jagged_grid_walls)->rows[i].elements[j]))
         {
           black_rects[black_count++] = rect;
@@ -2407,24 +2407,24 @@ static void
 draw_map(void)
 {
   static bool initialized = false;
-  static SDL_FRect black_rects[GRID_SIZE];
-  static SDL_FRect white_rects[GRID_SIZE];
+  static SDL_FRect black_rects[64];
+  static SDL_FRect white_rects[64];
   static int black_count = 0;
   static int white_count = 0;
   static float offset = 0.1f;
 
   if (!initialized)
   {
-    for (int i = 0; i < GRID_ROWS; i++)
+    for (int i = 0; i < 8; i++)
     {
-      for (int j = 0; j < GRID_COLS; j++)
+      for (int j = 0; j < 8; j++)
       {
         SDL_FRect rect;
-        rect.h = CELL_SIZE * (1.0f - offset);
-        rect.w = CELL_SIZE * (1.0f - offset);
-        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2);
-        rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
-        if (grid_walls[i * GRID_COLS + j])
+        rect.h = GRID_CELL_SIZE * (1.0f - offset);
+        rect.w = GRID_CELL_SIZE * (1.0f - offset);
+        rect.x = (j * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
+        rect.y = (i * GRID_CELL_SIZE) + (GRID_CELL_SIZE * offset / 2);
+        if (grid_walls[i * 8 + j])
         {
           black_rects[black_count++] = rect;
         }
@@ -2474,17 +2474,17 @@ Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, floa
 
   Hit_Box player_hit_box_normalized = {
       // Top-left
-      .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
-      .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
+      .tl.x = floorf(player_hit_box_world.tl.x / GRID_CELL_SIZE),
+      .tl.y = floorf(player_hit_box_world.tl.y / GRID_CELL_SIZE),
       // Top-right
-      .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
-      .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
+      .tr.x = floorf(player_hit_box_world.tr.x / GRID_CELL_SIZE),
+      .tr.y = floorf(player_hit_box_world.tr.y / GRID_CELL_SIZE),
       // Bottom-left
-      .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
-      .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
+      .bl.x = floorf(player_hit_box_world.bl.x / GRID_CELL_SIZE),
+      .bl.y = floorf(player_hit_box_world.bl.y / GRID_CELL_SIZE),
       // Bottom-right
-      .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
-      .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
+      .br.x = floorf(player_hit_box_world.br.x / GRID_CELL_SIZE),
+      .br.y = floorf(player_hit_box_world.br.y / GRID_CELL_SIZE),
   };
 
   return player_hit_box_normalized;
@@ -2499,10 +2499,10 @@ void move_player(float direction, bool is_sprinting, float delta_time)
 
   Hit_Box new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
 
-  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
-  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
-  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
-  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
+  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * 8) + new_pos_2D_hit_box_normalized.tl.x;
+  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * 8) + new_pos_2D_hit_box_normalized.tr.x;
+  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * 8) + new_pos_2D_hit_box_normalized.bl.x;
+  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * 8) + new_pos_2D_hit_box_normalized.br.x;
 
   Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
   Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];

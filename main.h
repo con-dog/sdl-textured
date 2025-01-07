@@ -1,13 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-// Map
-#define CELL_SIZE 64.0f
-#define GRID_ROWS 8
-#define GRID_COLS 8
-#define GRID_SIZE (GRID_ROWS * GRID_COLS)
-
-#define JAGGED_GRID_ROWS 2
 // Player
 
 // Input helpers
