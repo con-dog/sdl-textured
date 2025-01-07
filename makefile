@@ -4,34 +4,34 @@ CFLAGS = -Wall -Wextra $(shell pkg-config sdl3 sdl3-ttf --cflags)
 LIBS = $(shell pkg-config sdl3 sdl3-ttf --libs)
 
 # Directory structure
+ASSETS_DIR = assets
 CONFIG_DIR = config
 DATA_DIR = data
 IO_DIR = graphics
 OBJECTS_DIR = objects
-TEXTURES_DIR = textures
 TYPES_DIR = types
 UTILS_DIR = utils
 
 # Include paths
 INCLUDES = \
+    -I$(ASSETS_DIR) \
     -I$(CONFIG_DIR) \
     -I$(DATA_DIR) \
     -I$(IO_DIR) \
     -I$(OBJECTS_DIR) \
-    -I$(TEXTURES_DIR) \
     -I$(UTILS_DIR)
 
 # Source files (excluding main)
+ASSETS_SRC = $(wildcard $(ASSETS_DIR)/**/*.c)
 CONFIG_SRC = $(wildcard $(CONFIG_DIR)/**/*.c)
 DATA_SRC = $(wildcard $(DATA_DIR)/**/*.c)
 IO_SRC = $(wildcard $(IO_DIR)/**/*.c)
 OBJECTS_SRC = $(wildcard $(OBJECTS_DIR)/**/*.c)
-TEXTURES_SRC = $(wildcard $(TEXTURES_DIR)/**/*.c)
 TYPES_SRC = $(wildcard $(TYPES_DIR)/**/*.c)
 UTILS_SRC = $(wildcard $(UTILS_DIR)/**/*.c)
 
 # All source files (excluding main)
-SRC = $(CONFIG_SRC) $(DATA_SRC) $(IO_SRC) $(OBJECTS_SRC) $(TEXTURES_SRC) $(TYPES_SRC) $(UTILS_SRC)
+SRC = $(ASSETS_SRC) $(CONFIG_SRC) $(DATA_SRC) $(IO_SRC) $(OBJECTS_SRC) $(TYPES_SRC) $(UTILS_SRC)
 
 # Object files (excluding main)
 OBJ = $(SRC:.c=.o)
