@@ -2382,7 +2382,7 @@ static void draw_jagged_grid(void)
         SDL_FRect rect;
         rect.h = CELL_SIZE * (1.0f - offset);
         rect.w = CELL_SIZE * (1.0f - offset);
-        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2) + (j * CELL_SIZE * &(&jagged_grid_walls)->rows[i].x_offset);
+        rect.x = (j * CELL_SIZE) + (CELL_SIZE * offset / 2) + (j * CELL_SIZE + 64);
         rect.y = (i * CELL_SIZE) + (CELL_SIZE * offset / 2);
         if (*(&(&jagged_grid_walls)->rows[i].elements[j]))
         {

@@ -6,10 +6,12 @@
 #define BACKWARDS -1
 #define FORWARDS 1
 
-#include "math.h"
+#include <math.h>
 
+typedef int Rotation_Type;
 typedef double Degrees;
 typedef double Radians;
+
 extern Radians convert_deg_to_rads(Degrees degrees);
 
 #endif

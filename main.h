@@ -48,25 +48,9 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_rect.h>
 
+#include "./objects/types.h"
 #include "./types/algebraic-types.h"
 #include "./utils/math-utils.h"
-
-typedef int8_t Rotation_Type;
-
-typedef struct
-{
-  Point_2D tl;
-  Point_2D tr;
-  Point_2D bl;
-  Point_2D br;
-} Hit_Box;
-
-typedef struct Player
-{
-  SDL_FRect rect;
-  Vector_2D delta;
-  Degrees angle; // degrees
-} Player;
 
 typedef enum Wall_Surface_Hit
 {
