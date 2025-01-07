@@ -2382,10 +2382,19 @@ static void init_jagged_grid(void)
       .elements = malloc(4 * sizeof(Wall_Type)),
   };
 
+  jagged_grid_walls.rows[1] = (JaggedRow){
+      .start_index = 3,
+      .length = 2,
+      .elements = malloc(2 * sizeof(Wall_Type)),
+  };
+
   jagged_grid_walls.rows[0].elements[1] = A;
   jagged_grid_walls.rows[0].elements[2] = z;
   jagged_grid_walls.rows[0].elements[3] = A;
   jagged_grid_walls.rows[0].elements[4] = z;
+
+  jagged_grid_walls.rows[1].elements[3] = A;
+  jagged_grid_walls.rows[1].elements[4] = z;
 }
 
 Wall_Type get_jagged_row_element(unsigned int row, unsigned int col)
@@ -2405,8 +2414,8 @@ Wall_Type get_jagged_row_element(unsigned int row, unsigned int col)
 static void draw_jagged_grid(void)
 {
   static bool initialized = false;
-  static SDL_FRect black_rects[4];
-  static SDL_FRect white_rects[4];
+  static SDL_FRect black_rects[GRID_SIZE];
+  static SDL_FRect white_rects[GRID_SIZE];
   static int black_count = 0;
   static int white_count = 0;
   static float offset = 0.1f;

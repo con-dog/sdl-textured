@@ -12,7 +12,7 @@
 #define GRID_COLS 8
 #define GRID_SIZE (GRID_ROWS * GRID_COLS)
 
-#define JAGGED_GRID_ROWS 1
+#define JAGGED_GRID_ROWS 2
 // Player
 #define PLAYER_W 8.0f
 #define PLAYER_H 8.0f
