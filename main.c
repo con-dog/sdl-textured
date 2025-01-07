@@ -2499,66 +2499,66 @@ void rotate_player(Rotation_Type rotation, float delta_time)
   player.delta.y = sin(radians) * MOTION_DELTA_MULTIPLIER;
 }
 
-// Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
-// {
-//   Hit_Box player_hit_box_world = {
-//       // Top-left
-//       .tl.x = world_point->x - offset,
-//       .tl.y = world_point->y - offset,
-//       // Top-right
-//       .tr.x = world_point->x + PLAYER_W + offset,
-//       .tr.y = world_point->y - offset,
-//       // Bottom-left
-//       .bl.x = world_point->x - offset,
-//       .bl.y = world_point->y + PLAYER_H + offset,
-//       // Bottom-right
-//       .br.x = world_point->x + PLAYER_W + offset,
-//       .br.y = world_point->y + PLAYER_H + offset};
+Hit_Box convert_world_2D_point_to_rect_2D_normalized(Point_2D *world_point, float offset)
+{
+  Hit_Box player_hit_box_world = {
+      // Top-left
+      .tl.x = world_point->x - offset,
+      .tl.y = world_point->y - offset,
+      // Top-right
+      .tr.x = world_point->x + PLAYER_W + offset,
+      .tr.y = world_point->y - offset,
+      // Bottom-left
+      .bl.x = world_point->x - offset,
+      .bl.y = world_point->y + PLAYER_H + offset,
+      // Bottom-right
+      .br.x = world_point->x + PLAYER_W + offset,
+      .br.y = world_point->y + PLAYER_H + offset};
 
-//   Hit_Box player_hit_box_normalized = {
-//       // Top-left
-//       .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
-//       .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
-//       // Top-right
-//       .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
-//       .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
-//       // Bottom-left
-//       .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
-//       .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
-//       // Bottom-right
-//       .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
-//       .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
-//   };
+  Hit_Box player_hit_box_normalized = {
+      // Top-left
+      .tl.x = floorf(player_hit_box_world.tl.x / CELL_SIZE),
+      .tl.y = floorf(player_hit_box_world.tl.y / CELL_SIZE),
+      // Top-right
+      .tr.x = floorf(player_hit_box_world.tr.x / CELL_SIZE),
+      .tr.y = floorf(player_hit_box_world.tr.y / CELL_SIZE),
+      // Bottom-left
+      .bl.x = floorf(player_hit_box_world.bl.x / CELL_SIZE),
+      .bl.y = floorf(player_hit_box_world.bl.y / CELL_SIZE),
+      // Bottom-right
+      .br.x = floorf(player_hit_box_world.br.x / CELL_SIZE),
+      .br.y = floorf(player_hit_box_world.br.y / CELL_SIZE),
+  };
 
-//   return player_hit_box_normalized;
-// }
+  return player_hit_box_normalized;
+}
 
-// void move_player(float direction, bool is_sprinting, float delta_time)
-// {
-//   Point_2D new_pos = {
-//       .x = player.rect.x + (direction * player.delta.x * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
-//       .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
-//   };
+void move_player(float direction, bool is_sprinting, float delta_time)
+{
+  Point_2D new_pos = {
+      .x = player.rect.x + (direction * player.delta.x * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
+      .y = player.rect.y + (direction * player.delta.y * (PLAYER_SPEED + (is_sprinting ? SPRINT_SPEED_INCREASE : 0)) * delta_time),
+  };
 
-//   Hit_Box new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
+  Hit_Box new_pos_2D_hit_box_normalized = convert_world_2D_point_to_rect_2D_normalized(&new_pos, PLAYER_INTERACTION_DISTANCE);
 
-//   unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
-//   unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
-//   unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
-//   unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
+  unsigned int top_left_map_cell_index = (new_pos_2D_hit_box_normalized.tl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tl.x;
+  unsigned int top_right_map_cell_index = (new_pos_2D_hit_box_normalized.tr.y * GRID_COLS) + new_pos_2D_hit_box_normalized.tr.x;
+  unsigned int bottom_left_map_cell_index = (new_pos_2D_hit_box_normalized.bl.y * GRID_COLS) + new_pos_2D_hit_box_normalized.bl.x;
+  unsigned int bottom_right_map_cell_index = (new_pos_2D_hit_box_normalized.br.y * GRID_COLS) + new_pos_2D_hit_box_normalized.br.x;
 
-//   Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
-//   Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
-//   Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
-//   Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
+  Wall_Type top_left_map_cell_value = grid_walls[top_left_map_cell_index];
+  Wall_Type top_right_map_cell_value = grid_walls[top_right_map_cell_index];
+  Wall_Type bottom_left_map_cell_value = grid_walls[bottom_left_map_cell_index];
+  Wall_Type bottom_right_map_cell_value = grid_walls[bottom_right_map_cell_index];
 
-//   if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
-//       bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
-//   {
-//     player.rect.x = new_pos.x;
-//     player.rect.y = new_pos.y;
-//   }
-// }
+  if (top_left_map_cell_value == z && top_right_map_cell_value == z &&
+      bottom_left_map_cell_value == z && bottom_right_map_cell_value == z)
+  {
+    player.rect.x = new_pos.x;
+    player.rect.y = new_pos.y;
+  }
+}
 
 uint8_t get_kb_arrow_input_state(void)
 {
