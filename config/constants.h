@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef CONFIG_CONSTANTS_H
+#define CONFIG_CONSTANTS_H
 
 #define WINDOW_W 1024
 #define WINDOW_H 512

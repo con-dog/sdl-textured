@@ -1,10 +1,5 @@
-#ifndef DATA_GRID_H
-#define DATA_GRID_H
-
-#define GRID_CELL_SIZE 64.0f
-#define MAX_GRID_ROWS 100
-#define MAX_GRID_COLS 100
-#define MAX_GRID_SIZE (MAX_GRID_ROWS * MAX_GRID_COLS)
+#ifndef GRID_TYPES_H
+#define GRID_TYPES_H
 
 #include "../wall/types.h"
 

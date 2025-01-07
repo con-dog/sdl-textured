@@ -2076,7 +2076,7 @@ static int font_init(void)
 static int brick_texture_init(void)
 {
 
-  brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
+  brick_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_PIXEL_W, TEXTURE_PIXEL_H);
   if (brick_texture == NULL)
   {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
@@ -2084,28 +2084,28 @@ static int brick_texture_init(void)
   }
 
   SDL_SetTextureScaleMode(brick_texture, SDL_SCALEMODE_NEAREST);
-  SDL_UpdateTexture(brick_texture, NULL, brick_pixel_image.pixel_data, TEXTURE_W * 4);
+  SDL_UpdateTexture(brick_texture, NULL, brick_pixel_image.pixel_data, TEXTURE_PIXEL_W * 4);
 
   return 0;
 }
 
 static int leaves_texture_init(void)
 {
-  leaves_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
+  leaves_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_PIXEL_W, TEXTURE_PIXEL_H);
   if (leaves_texture == NULL)
   {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
     return 3;
   }
   SDL_SetTextureScaleMode(leaves_texture, SDL_SCALEMODE_NEAREST);
-  SDL_UpdateTexture(leaves_texture, NULL, leaves_pixel_image.pixel_data, TEXTURE_W * 4);
+  SDL_UpdateTexture(leaves_texture, NULL, leaves_pixel_image.pixel_data, TEXTURE_PIXEL_W * 4);
 
   return 0;
 }
 
 static int flowers_texture_init(void)
 {
-  flowers_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_W, TEXTURE_H);
+  flowers_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, TEXTURE_PIXEL_W, TEXTURE_PIXEL_H);
   if (flowers_texture == NULL)
   {
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Texture could not initialize! SDL_Texture Error: %s\n", SDL_GetError());
@@ -2113,7 +2113,7 @@ static int flowers_texture_init(void)
   }
 
   SDL_SetTextureScaleMode(flowers_texture, SDL_SCALEMODE_NEAREST);
-  SDL_UpdateTexture(flowers_texture, NULL, flower_pixel_image.pixel_data, TEXTURE_W * 4);
+  SDL_UpdateTexture(flowers_texture, NULL, flower_pixel_image.pixel_data, TEXTURE_PIXEL_W * 4);
 
   return 0;
 }
@@ -2258,14 +2258,14 @@ static void cast_rays_from_player(void)
       wall_x = world_next_wall_intersection_y;
       Point_1D wall_x_normalized = wall_x / GRID_CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
-      texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
+      texture_x = roundf(wall_x_offset_normalized * TEXTURE_PIXEL_W);
     }
     else
     {
       wall_x = world_next_wall_intersection_x;
       Point_1D wall_x_normalized = wall_x / GRID_CELL_SIZE;
       Point_1D wall_x_offset_normalized = wall_x_normalized - floorf(wall_x_normalized);
-      texture_x = roundf(wall_x_offset_normalized * TEXTURE_W);
+      texture_x = roundf(wall_x_offset_normalized * TEXTURE_PIXEL_W);
 
       unsigned int grid_1D_array_index = (grid_y * 8) + grid_x;
     }
@@ -2285,7 +2285,7 @@ static void cast_rays_from_player(void)
           .x = texture_x,
           .y = 0,
           .w = 1,
-          .h = TEXTURE_H};
+          .h = TEXTURE_PIXEL_H};
       SDL_RenderTexture(renderer, brick_texture, &src_rect, &wall_rect);
       break;
     }
@@ -2295,7 +2295,7 @@ static void cast_rays_from_player(void)
           .x = texture_x,
           .y = 0,
           .w = 1,
-          .h = TEXTURE_H};
+          .h = TEXTURE_PIXEL_H};
       SDL_RenderTexture(renderer, flowers_texture, &src_rect, &wall_rect);
       break;
     }
@@ -2305,7 +2305,7 @@ static void cast_rays_from_player(void)
           .x = texture_x,
           .y = 0,
           .w = 1,
-          .h = TEXTURE_H};
+          .h = TEXTURE_PIXEL_H};
       SDL_RenderTexture(renderer, leaves_texture, &src_rect, &wall_rect);
       break;
     }

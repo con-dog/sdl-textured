@@ -1,5 +1,5 @@
-#ifndef DATA_WALL_H
-#define DATA_WALL_H
+#ifndef WALL_TYPES_H
+#define WALL_TYPES_H
 
 // clang-format off
 typedef enum Wall_Type

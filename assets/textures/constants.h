@@ -1,0 +1,7 @@
+#ifndef TEXTURES_CONSTANTS_H
+#define TEXTURES_CONSTANTS_H
+
+#define TEXTURE_PIXEL_W 64
+#define TEXTURE_PIXEL_H 64
+
+#endif
