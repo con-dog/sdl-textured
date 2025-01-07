@@ -2600,6 +2600,7 @@ int main(int argc, char *argv[])
 
   Jagged_Grid *grid = read_grid_csv_file("./assets/levels/level-1.csv");
   print_jagged_grid(grid);
+  free_jagged_grid(grid);
 
   // brick_texture_init();
   // leaves_texture_init();

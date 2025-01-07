@@ -110,7 +110,8 @@ extern void print_jagged_grid(const Jagged_Grid *grid)
   }
 }
 
-void process_row(char *line, Jagged_Row *row)
+// Manipulate rows
+static void process_row(char *line, Jagged_Row *row)
 {
   // First pass: find first and last letter positions
   int first_letter = -1;
